@@ -130,7 +130,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="#os">OS 环境配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rust">Rust 开发环境配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#qemu">Qemu 模拟器安装</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rcore-tutorial-v3">试运行 rCore-Tutorial-v3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rcore-tutorial">试运行 rCore-Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gdb">GDB 调试支持*</a></li>
 </ul>
 </li>
@@ -387,13 +387,17 @@ qemu-riscv64 --version
 </pre></div>
 </div>
 </div>
-<div class="section" id="rcore-tutorial-v3">
-<h2>试运行 rCore-Tutorial-v3<a class="headerlink" href="#rcore-tutorial-v3" title="永久链接至标题">¶</a></h2>
+<div class="section" id="rcore-tutorial">
+<h2>试运行 rCore-Tutorial<a class="headerlink" href="#rcore-tutorial" title="永久链接至标题">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/zhanghx0905/rCore-Tutorial-2021Autumn -b ch7
 </pre></div>
 </div>
 <p>只需在 <code class="docutils literal notranslate"><span class="pre">os</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code> 即可。在内核加载完毕之后，可以看到目前可用的应用程序。 <code class="docutils literal notranslate"><span class="pre">usertests</span></code> 打包了其中的很大一部分，我们可以运行它，只需输入在终端中输入它的名字即可。</p>
 <p>之后，可以先按下 <code class="docutils literal notranslate"><span class="pre">Ctrl+A</span></code> ，再按下 <code class="docutils literal notranslate"><span class="pre">X</span></code> 来退出 Qemu。</p>
+<div class="admonition attention">
+<p class="admonition-title">注意</p>
+<p>请务必执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code>，这将为你安装一些上文没有提及的 Rust 包依赖。</p>
+</div>
 <p>恭喜你完成了实验环境的配置，可以开始阅读教程的正文部分了！</p>
 </div>
 <div class="section" id="gdb">

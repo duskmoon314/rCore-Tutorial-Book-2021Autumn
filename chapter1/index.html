@@ -133,7 +133,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="2remove-std.html">移除标准库依赖</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3-1-mini-rt-usrland.html">构建用户态执行环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html">构建裸机执行环境</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4understand-prog.html">理解应用程序和执行环境</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../chapter2/index.html">第二章：批处理系统</a></li>
@@ -232,55 +231,40 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="1app-ee-platform.html">应用程序执行环境与平台支持</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id3">执行应用程序</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id4">应用程序执行环境</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id5">平台与目标三元组</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#rust">Rust 标准库与核心库</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id2">执行应用程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id3">理解应用程序执行环境</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id4">平台与目标三元组</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1app-ee-platform.html#id5">修改目标平台</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="2remove-std.html">移除标准库依赖</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="2remove-std.html#id2">本节导读</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2remove-std.html#println">移除 println! 宏</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2remove-std.html#panic-handler">提供语义项 panic_handler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2remove-std.html#main">移除 main 函数</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2remove-std.html#id4">分析被移除标准库的程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2remove-std.html#id2">分析被移除标准库的程序</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="3-1-mini-rt-usrland.html">构建用户态执行环境</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="3-1-mini-rt-usrland.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-1-mini-rt-usrland.html#id4">用户态最小化执行环境</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="3-1-mini-rt-usrland.html#id5">执行环境初始化</a></li>
-<li class="toctree-l3"><a class="reference internal" href="3-1-mini-rt-usrland.html#id6">程序正常退出</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-1-mini-rt-usrland.html#id2">用户态最小化执行环境</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="3-1-mini-rt-usrland.html#id3">执行环境初始化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="3-1-mini-rt-usrland.html#id4">程序正常退出</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="3-1-mini-rt-usrland.html#id7">有显示支持的用户态执行环境</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="3-1-mini-rt-usrland.html#id8">实现输出字符串的相关函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-1-mini-rt-usrland.html#id5">有显示支持的用户态执行环境</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="3-1-mini-rt-usrland.html#id6">实现输出字符串的相关函数</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="3-2-mini-rt-baremetal.html">构建裸机执行环境</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id3">了解硬件组成和裸机启动过程</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id4">硬件组成</a></li>
-<li class="toctree-l3"><a class="reference internal" href="3-2-mini-rt-baremetal.html#term-bootloader">裸机启动过程</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id6">实现关机功能</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id7">设置正确的程序内存布局</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id8">正确配置栈空间布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id3">裸机启动过程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id4">实现关机功能</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id5">设置正确的程序内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id6">正确配置栈空间布局</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#bss">清空 .bss 段</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id9">添加裸机打印相关函数</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id10">添加处理异常错误的功能</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="4understand-prog.html">理解应用程序和执行环境</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="4understand-prog.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4understand-prog.html#term-physical-memory">物理内存与物理地址</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4understand-prog.html#function-call-and-stack">函数调用与栈</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4understand-prog.html#term-calling-convention">调用规范</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4understand-prog.html#id8">程序内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id7">添加裸机打印相关函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-2-mini-rt-baremetal.html#id8">添加处理异常错误的功能</a></li>
 </ul>
 </li>
 </ul>

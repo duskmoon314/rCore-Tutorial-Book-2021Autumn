@@ -296,7 +296,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </tbody>
 </table>
 <p>其中，级别的数值越大，特权级越高，掌控硬件的能力越强。从表中可以看出， M 模式处在最高的特权级，而 U 模式处于最低的特权级。在CPU硬件层面，除了M模式必须存在外，其它模式可以不存在。</p>
-<p>之前我们给出过支持应用程序运行的一套 <a class="reference internal" href="../chapter1/1app-ee-platform.html#app-software-stack"><span class="std std-ref">执行环境栈</span></a> ，现在我们站在特权级架构的角度去重新看待它：</p>
+<p>之前我们给出过支持应用程序运行的一套 <span class="xref std std-ref">执行环境栈</span> ，现在我们站在特权级架构的角度去重新看待它：</p>
 <img alt="../_images/PrivilegeStack.png" class="align-center" id="privilegestack" src="../_images/PrivilegeStack.png" />
 <p id="term-see">和之前一样，白色块表示一层执行环境，黑色块表示相邻两层执行环境之间的接口。这张图片给出了能够支持运行 Unix 这类复杂系统的软件栈。其中
 内核代码运行在 S 模式上；应用程序运行在 U 模式上。运行在 M 模式上的软件被称为 <strong>监督模式执行环境</strong> (SEE, Supervisor Execution Environment)
