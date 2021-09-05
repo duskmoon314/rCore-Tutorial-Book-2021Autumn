@@ -389,7 +389,7 @@ qemu-riscv64 --version
 </div>
 <div class="section" id="rcore-tutorial-v3">
 <h2>试运行 rCore-Tutorial-v3<a class="headerlink" href="#rcore-tutorial-v3" title="永久链接至标题">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/zhanghx0905/rCore-Tutorial-2021-Autumn -b ch7
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/zhanghx0905/rCore-Tutorial-2021Autumn -b ch7
 </pre></div>
 </div>
 <p>只需在 <code class="docutils literal notranslate"><span class="pre">os</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code> 即可。在内核加载完毕之后，可以看到目前可用的应用程序。 <code class="docutils literal notranslate"><span class="pre">usertests</span></code> 打包了其中的很大一部分，我们可以运行它，只需输入在终端中输入它的名字即可。</p>
@@ -398,6 +398,10 @@ qemu-riscv64 --version
 </div>
 <div class="section" id="gdb">
 <h2>GDB 调试支持*<a class="headerlink" href="#gdb" title="永久链接至标题">¶</a></h2>
+<div class="admonition attention">
+<p class="admonition-title">注意</p>
+<p>使用 GDB debug 并不是必须的，你可以暂时跳过本小节。</p>
+</div>
 <p>在 <code class="docutils literal notranslate"><span class="pre">os</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">debug</span></code> 可以调试我们的内核，这需要安装终端复用工具 <code class="docutils literal notranslate"><span class="pre">tmux</span></code> ，还需要基于 riscv64 平台的 gdb 调试器 <code class="docutils literal notranslate"><span class="pre">riscv64-unknown-elf-gdb</span></code> 。该调试器包含在 riscv64 gcc 工具链中，工具链的预编译版本可以在如下链接处下载：</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz">Ubuntu 平台</a></p></li>
@@ -406,10 +410,6 @@ qemu-riscv64 --version
 <li><p><a class="reference external" href="https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-centos6.tar.gz">CentOS 平台</a></p></li>
 </ul>
 <p>解压后在 <code class="docutils literal notranslate"><span class="pre">bin</span></code> 目录下即可找到 <code class="docutils literal notranslate"><span class="pre">riscv64-unknown-elf-gdb</span></code> 以及另外一些常用工具 <code class="docutils literal notranslate"><span class="pre">objcopy/objdump/readelf</span></code> 等。</p>
-<div class="admonition attention">
-<p class="admonition-title">注意</p>
-<p>使用 GDB debug 并不是必须的。</p>
-</div>
 </div>
 </div>
 
