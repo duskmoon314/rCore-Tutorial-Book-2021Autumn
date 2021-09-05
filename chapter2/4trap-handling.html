@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>实现特权级的切换 &mdash; rCore-Tutorial-Book-v3 0.1 文档</title>
+  <title>实现特权级的切换 &mdash; rCore-Tutorial-Book-Autumn2021 0.1 文档</title>
   
 
   
@@ -79,7 +79,7 @@ commentsRunWhenDOMLoaded(addUtterances);
     
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="chapter2练习" href="5exercise.html" />
+    <link rel="next" title="第三章：多道程序与分时多任务" href="../chapter3/index.html" />
     <link rel="prev" title="实现批处理操作系统" href="3batch-system.html" /> 
 </head>
 
@@ -94,7 +94,7 @@ commentsRunWhenDOMLoaded(addUtterances);
           
 
           
-            <a href="../index.html" class="icon icon-home"> rCore-Tutorial-Book-v3
+            <a href="../index.html" class="icon icon-home"> rCore-Tutorial-Book-Autumn2021
           
 
           
@@ -125,9 +125,9 @@ commentsRunWhenDOMLoaded(addUtterances);
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Part1 - Just do it!</span></p>
+              <p class="caption" role="heading"><span class="caption-text">正文</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../chapter0/index.html">第零章：操作系统概述</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../0setup-devel-env.html">第零章：实验环境配置</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapter1/index.html">第一章：应用程序与基本执行环境</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">第二章：批处理系统</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
@@ -152,7 +152,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l3"><a class="reference internal" href="#ch2-app-execution">执行应用程序</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="5exercise.html">chapter2练习</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../chapter3/index.html">第三章：多道程序与分时多任务</a></li>
@@ -160,8 +159,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1"><a class="reference internal" href="../chapter5/index.html">第五章：进程及进程管理</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapter6/index.html">第六章：进程间通信</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapter7/index.html">第七章：文件系统与I/O重定向</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter8/index.html">第八章：I/O设备管理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../lab8.html">chapter8练习</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
@@ -169,13 +166,11 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../terminology.html">术语中英文对照表</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">开发注记</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../log.html">更新日志</a></li>
 </ul>
 
             
@@ -191,7 +186,7 @@ commentsRunWhenDOMLoaded(addUtterances);
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">rCore-Tutorial-Book-v3</a>
+          <a href="../index.html">rCore-Tutorial-Book-Autumn2021</a>
         
       </nav>
 
@@ -315,7 +310,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </div>
 <div class="section" id="id5">
 <h3>特权级切换<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
-<p>大多数的 Trap (陷入) 发生的场景都是在执行某条特殊指令（如 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> ）之后，CPU 发现触发了一个 Trap并需要进行特殊处理，并涉及到 <a class="reference internal" href="../chapter0/3os-hw-abstract.html#term-ee-switch"><span class="std std-ref">执行环境切换</span></a> 。具体而言，用户态执行环境中的应用程序通过 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 指令
+<p>大多数的 Trap (陷入) 发生的场景都是在执行某条特殊指令（如 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> ）之后，CPU 发现触发了一个 Trap并需要进行特殊处理，并涉及到 <span class="xref std std-ref">执行环境切换</span> 。具体而言，用户态执行环境中的应用程序通过 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 指令
 向内核态执行环境中的操作系统请求某项服务功能，那么处理器和操作系统会完成到内核态执行环境的切换，并在操作系统完成服务后，再次切换到用户态执行环境，然后应用程序会紧接着``ecall`` 指令的后一条指令位置处继续执行，参考 <a class="reference internal" href="1rv-privilege.html#environment-call-flow"><span class="std std-ref">图示</span></a> 。</p>
 <p>应用程序被切换回来之后需要从暂停的位置恢复并继续执行，这需要在切换前后维持应用程序的上下文保持不变。应用程序的上下文包括通用寄存器和栈两个主要部分。
 由于CPU 在不同特权级下共享一套通用寄存器，所以在运行操作系统的 Trap
@@ -739,7 +734,7 @@ S 特权级，而它希望能够切换到 U 特权级。在 RISC-V 架构中，�
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="5exercise.html" class="btn btn-neutral float-right" title="chapter2练习" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../chapter3/index.html" class="btn btn-neutral float-right" title="第三章：多道程序与分时多任务" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="3batch-system.html" class="btn btn-neutral float-left" title="实现批处理操作系统" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
     </div>
 
@@ -747,7 +742,7 @@ S 特权级，而它希望能够切换到 U 特权级。在 RISC-V 架构中，�
 
   <div role="contentinfo">
     <p>
-        &#169; 版权所有 2020, Yifan Wu.
+        &#169; 版权所有 OS2021Autumn.
 
     </p>
   </div>
