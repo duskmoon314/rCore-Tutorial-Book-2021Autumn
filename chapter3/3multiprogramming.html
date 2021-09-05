@@ -241,7 +241,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <h1>多道程序与协作式调度<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id2">
 <h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>上一节我们已经介绍了任务切换是如何实现的，最终我们将其封装为一个函数 <code class="docutils literal notranslate"><span class="pre">__switch</span></code> 。但是在实际使用的时候，我们需要知道何时调用该函数，以及如何确定传入函数的两个参数——分别代表正待换出和即将被换入的两条 Trap 执行流。本节我们就来介绍任务切换的第一种实际应用场景：多道程序。</p>
+<p>上一节我们已经介绍了任务切换是如何实现的，最终我们将其封装为一个函数 <code class="docutils literal notranslate"><span class="pre">__switch</span></code> 。但是在实际使用的时候，我们需要知道何时调用该函数，以及如何确定传入函数的两个参数——分别代表正待换出和即将被换入的两条 Trap 控制流。本节我们就来介绍任务切换的第一种实际应用场景：多道程序。</p>
 <p>本节的一个重点是展示进一步增强的操作系统管理能力的和对处理器资源的相对高效利用。为此，对 <strong>任务</strong> 的概念进行进一步扩展和延伸：形成了</p>
 <ul class="simple">
 <li><p>任务运行状态：任务从开始到结束执行过程中所处的不同运行状态：未初始化、准备执行、正在执行、已退出</p></li>

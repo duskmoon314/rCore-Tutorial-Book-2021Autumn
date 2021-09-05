@@ -149,7 +149,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">virtio驱动程序</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id6">驱动程序与设备之间的交互</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">virtio驱动程序的执行流程</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">virtio驱动程序的执行过程</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#virtio-blk">virtio-blk驱动程序</a><ul>
@@ -353,7 +353,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </div>
 <div class="section" id="id5">
 <h2>virtio驱动程序<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
-<p>这部分内容是各种virtio驱动程序的共性部分，主要包括驱动程序与设备的交互步骤，初始化设备，以及驱动程序执行流程中的一些实现细节。</p>
+<p>这部分内容是各种virtio驱动程序的共性部分，主要包括驱动程序与设备的交互步骤，初始化设备，以及驱动程序执行过程中的一些实现细节。</p>
 <div class="section" id="id6">
 <h3>驱动程序与设备之间的交互<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <p>对于驱动程序和外设之间采用virtio机制（也可称为协议）进行交互的原理如下图所示。</p>
@@ -370,7 +370,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <img alt="../_images/vring.png" class="align-center" id="vring" src="../_images/vring.png" />
 </div>
 <div class="section" id="id7">
-<h3>virtio驱动程序的执行流程<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<h3>virtio驱动程序的执行过程<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
 <p><strong>设备的初始化</strong></p>
 <p>操作系统通过某种方式（设备发现，基于设备树的查找等）找到virtio设备后，驱动程序进行设备初始化的常规步骤如下所示：</p>
 <ol class="arabic simple">

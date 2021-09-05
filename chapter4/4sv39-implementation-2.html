@@ -393,7 +393,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p><strong>Rust 语法卡片：在单核环境下使用 Mutex&lt;T&gt; 的原因</strong></p>
 <p>在编写一个多线程的应用时，加锁的目的是为了避免数据竞争，使得里层的共享数据结构同一时间只有一个线程
 在对它进行访问。然而，目前我们的内核运行在单 CPU 上，且 Trap 进入内核之后并没有手动打开中断，这也就
-使得同一时间最多只有一条 Trap 执行流并发访问内核的各数据结构，此时应该是并没有任何数据竞争风险的。那么
+使得同一时间最多只有一条 Trap 控制流并发访问内核的各数据结构，此时应该是并没有任何数据竞争风险的。那么
 加锁的原因其实有两点：</p>
 <ol class="arabic">
 <li><p>在不触及 <code class="docutils literal notranslate"><span class="pre">unsafe</span></code> 的情况下实现 <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">mut</span></code> 语义。如果读者还有印象，
