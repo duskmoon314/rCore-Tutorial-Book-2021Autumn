@@ -237,8 +237,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="fm">global_asm!</span><span class="p">(</span><span class="fm">include_str!</span><span class="p">(</span><span class="s">&quot;link_app.S&quot;</span><span class="p">));</span><span class="w"></span>
 </pre></div>
 </div>
-<p>这里我们引入了一段汇编代码 <code class="docutils literal notranslate"><span class="pre">link_app.S</span></code> ，它是在 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code> 构建操作系统时自动生成的。
-<code class="docutils literal notranslate"><span class="pre">link_app.S</span></code> 里面的内容大致如下：</p>
+<p>这里我们引入了一段汇编代码 <code class="docutils literal notranslate"><span class="pre">link_app.S</span></code> ，它是在 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code> 构建操作系统时自动生成的，里面的内容大致如下：</p>
 <div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># os/src/link_app.S</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span>    <span class="na">.align</span> <span class="mi">3</span>
@@ -273,25 +272,25 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">32</span><span class="nl">app_2_end:</span>
 </pre></div>
 </div>
-<p>可以看到第 13 行开始的三个数据段分别插入了三个应用程序的二进制镜像，
+<p>第 13 行开始的三个数据段分别插入了三个应用程序的二进制镜像，
 并且各自有一对全局符号 <code class="docutils literal notranslate"><span class="pre">app_*_start,</span> <span class="pre">app_*_end</span></code> 指示它们的开始和结束位置。
 而第 3 行开始的另一个数据段相当于一个 64 位整数数组。
 数组中的第一个元素表示应用程序的数量，后面则按照顺序放置每个应用程序的起始地址，
 最后一个元素放置最后一个应用程序的结束位置。这样数组中相邻两个元素记录了每个应用程序的始末位置，
 这个数组所在的位置由全局符号 <code class="docutils literal notranslate"><span class="pre">_num_app</span></code> 所指示。</p>
-<p>这个文件是在 <code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">build</span></code> 的时候，由脚本 <code class="docutils literal notranslate"><span class="pre">os/build.rs</span></code> 控制生成的。有兴趣的读者可以参考其代码。</p>
+<p>这个文件是在 <code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">build</span></code> 时，由脚本 <code class="docutils literal notranslate"><span class="pre">os/build.rs</span></code> 控制生成的。</p>
 </div>
 <div class="section" id="id3">
 <h2>找到并加载应用程序二进制码<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>我们在 <code class="docutils literal notranslate"><span class="pre">os</span></code> 的 <code class="docutils literal notranslate"><span class="pre">batch</span></code> 子模块中实现一个应用管理器 <code class="docutils literal notranslate"><span class="pre">AppManager</span></code> ，结构体定义如下：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">AppManager</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">num_app</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="n">current_app</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="n">app_start</span>: <span class="p">[</span><span class="kt">usize</span><span class="p">;</span><span class="w"> </span><span class="n">MAX_APP_NUM</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="n">num_app</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">current_app</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">app_start</span>: <span class="p">[</span><span class="kt">usize</span><span class="p">;</span><span class="w"> </span><span class="n">MAX_APP_NUM</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>我们可以这样来初始化 <code class="docutils literal notranslate"><span class="pre">AppManager</span></code> 的全局实例：</p>
+<p>初始化 <code class="docutils literal notranslate"><span class="pre">AppManager</span></code> 的全局实例：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="n">lazy_static</span><span class="o">!</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">ref</span><span class="w"> </span><span class="n">APP_MANAGER</span>: <span class="nc">UPSafeCell</span><span class="o">&lt;</span><span class="n">AppManager</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">UPSafeCell</span>::<span class="n">new</span><span class="p">({</span><span class="w"></span>
@@ -321,14 +320,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p><code class="docutils literal notranslate"><span class="pre">UPSafeCell</span></code> 实现在 <code class="docutils literal notranslate"><span class="pre">sync</span></code> 模块中，调用 <code class="docutils literal notranslate"><span class="pre">exclusive_access</span></code> 方法能获取其内部对象的可变引用，
 如果程序运行中同时存在多个这样的引用，会触发 <code class="docutils literal notranslate"><span class="pre">already</span> <span class="pre">borrowed:</span> <span class="pre">BorrowMutError</span></code></p>
 </div>
-<p>这里我们使用了外部库 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 提供的 <code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏。要引入这个外部库，需要加入依赖：</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># os/Cargo.toml</span>
-
-<span class="k">[dependencies]</span>
-<span class="n">lazy_static</span> <span class="o">=</span> <span class="p">{</span> <span class="n">version</span> <span class="o">=</span> <span class="s">&quot;1.4.0&quot;</span><span class="p">,</span> <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;spin_no_std&quot;</span><span class="p">]</span> <span class="p">}</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏提供了全局变量的运行时初始化功能。一般情况下，全局变量必须在编译期设置一个初始值，
+<p>这里使用了外部库 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 提供的 <code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏。</p>
+<p><code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏提供了全局变量的运行时初始化功能。一般情况下，全局变量必须在编译期设置初始值，
 但是有些全局变量的初始化依赖于运行期间才能得到的数据。
 如这里我们借助 <code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 声明了一个 <code class="docutils literal notranslate"><span class="pre">AppManager</span></code> 结构的名为 <code class="docutils literal notranslate"><span class="pre">APP_MANAGER</span></code> 的全局实例，
 只有在它第一次被使用到的时候才会进行实际的初始化工作。</p>
@@ -367,9 +360,9 @@ commentsRunWhenDOMLoaded(addUtterances);
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">batch</span></code> 子模块对外暴露出如下接口：</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> ：调用 <code class="docutils literal notranslate"><span class="pre">print_app_info</span></code> 的时候第一次用到了全局变量 <code class="docutils literal notranslate"><span class="pre">APP_MANAGER</span></code> ，它也是在这个时候完成初始化；</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">run_next_app</span></code> ：批处理操作系统的核心操作，即加载并运行下一个应用程序。当批处理操作系统完成初始化或者一个应用程序运行结束或出错之后会调用
-该函数。我们下节再介绍其具体实现。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> ：调用 <code class="docutils literal notranslate"><span class="pre">print_app_info</span></code> 的时第一次用到了全局变量 <code class="docutils literal notranslate"><span class="pre">APP_MANAGER</span></code> ，它在这时完成初始化；</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_next_app</span></code> ：批处理操作系统的核心操作，即加载并运行下一个应用程序。
+批处理操作系统完成初始化，或者应用程序运行结束/出错后会调用该函数。下节再介绍其具体实现。</p></li>
 </ul>
 </div>
 </div>

@@ -134,13 +134,12 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="2remove-std.html">移除标准库依赖</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3mini-rt-usrland.html">构建用户态执行环境</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">构建裸机执行环境</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">本节导读</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">裸机启动过程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">实现关机功能</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">设置正确的程序内存布局</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">正确配置栈空间布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">裸机启动过程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">实现关机功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">设置正确的程序内存布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">正确配置栈空间布局</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bss">清空 .bss 段</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">添加裸机打印相关函数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">添加裸机打印相关函数</a></li>
 </ul>
 </li>
 </ul>
@@ -236,13 +235,10 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span id="id1"></span><h1>构建裸机执行环境<a class="headerlink" href="#term-print-kernelminienv" title="永久链接至标题">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<div class="section" id="id2">
-<h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>有了上一节实现的用户态的最小执行环境，稍加改造，就可以完成裸机上的最小执行环境了。
 本节中，我们将把 <code class="docutils literal notranslate"><span class="pre">Hello</span> <span class="pre">world!</span></code> 应用程序从用户态态搬到内核态。</p>
-</div>
-<div class="section" id="id3">
-<h2>裸机启动过程<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id2">
+<h2>裸机启动过程<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>用 QEMU 软件 <code class="docutils literal notranslate"><span class="pre">qemu-system-riscv64</span></code> 来模拟 RISC-V 64 计算机。加载内核程序的命令如下：</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>qemu-system-riscv64 <span class="se">\</span>
             -machine virt <span class="se">\</span>
@@ -271,8 +267,8 @@ RustSBI完成硬件初始化后，会跳转到 <code class="docutils literal not
 比如关机，显示字符串等。</p>
 </div>
 </div>
-<div class="section" id="id4">
-<h2>实现关机功能<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id3">
+<h2>实现关机功能<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>对上一节实现的代码稍作调整，通过 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 调用 RustSBI 实现关机功能：</p>
 <div class="highlight-rust notranslate" id="term-llvm-sbicall"><div class="highlight"><pre><span></span><span class="c1">// bootloader/rustsbi-qemu.bin 直接添加的SBI规范实现的二进制代码，给操作系统提供基本支持服务</span>
 
@@ -321,8 +317,8 @@ $ qemu-system-riscv64 -machine virt -nographic -bios ../bootloader/rustsbi-qemu.
 <p>问题在哪？通过 rust-readobj 分析 <code class="docutils literal notranslate"><span class="pre">os</span></code> 可执行程序，发现其入口地址不是
 RustSBI 约定的 <code class="docutils literal notranslate"><span class="pre">0x80200000</span></code> 。我们需要修改程序的内存布局并设置好栈空间。</p>
 </div>
-<div class="section" id="id5">
-<h2>设置正确的程序内存布局<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id4">
+<h2>设置正确的程序内存布局<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>可以通过 <strong>链接脚本</strong> (Linker Script) 调整链接器的行为，使得最终生成的可执行文件的内存布局符合我们的预期。</p>
 <p>修改 Cargo 的配置文件来使用我们自己的链接脚本 <code class="docutils literal notranslate"><span class="pre">os/src/linker.ld</span></code>：</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="o">//</span> <span class="n">os</span><span class="o">/.</span><span class="n">cargo</span><span class="o">/</span><span class="n">config</span>
@@ -392,8 +388,8 @@ RustSBI 约定的 <code class="docutils literal notranslate"><span class="pre">0
 <p>从 <code class="docutils literal notranslate"><span class="pre">BASE_ADDRESS</span></code> 开始，代码段 <code class="docutils literal notranslate"><span class="pre">.text</span></code>, 只读数据段 <code class="docutils literal notranslate"><span class="pre">.rodata</span></code>，数据段 <code class="docutils literal notranslate"><span class="pre">.data</span></code>, bss 段 <code class="docutils literal notranslate"><span class="pre">.bss</span></code> 由低到高依次放置，
 且每个段都有两个全局变量给出其起始和结束地址（比如 <code class="docutils literal notranslate"><span class="pre">.text</span></code> 段的开始和结束地址分别是 <code class="docutils literal notranslate"><span class="pre">stext</span></code> 和 <code class="docutils literal notranslate"><span class="pre">etext</span></code> ）。</p>
 </div>
-<div class="section" id="id6">
-<h2>正确配置栈空间布局<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id5">
+<h2>正确配置栈空间布局<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>用另一段汇编代码初始化栈空间：</p>
 <div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># os/src/entry.asm</span>
 <span class="linenos"> 2</span>    <span class="na">.section</span> <span class="no">.text.entry</span>
@@ -467,13 +463,17 @@ RustSBI 约定的 <code class="docutils literal notranslate"><span class="pre">0
 </div>
 <p>链接脚本 <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code> 中给出的全局符号 <code class="docutils literal notranslate"><span class="pre">sbss</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ebss</span></code> 让我们能轻松确定 <code class="docutils literal notranslate"><span class="pre">.bss</span></code> 段的位置。</p>
 </div>
-<div class="section" id="id7">
-<h2>添加裸机打印相关函数<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id6">
+<h2>添加裸机打印相关函数<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>在上一节中我们为用户态程序实现的 <code class="docutils literal notranslate"><span class="pre">println</span></code> 宏，略作修改即可用于本节的内核态操作系统。
 详见 <code class="docutils literal notranslate"><span class="pre">os/src/console.rs</span></code>。</p>
 <p>利用 <code class="docutils literal notranslate"><span class="pre">println</span></code> 宏，我们重写异常处理函数 <code class="docutils literal notranslate"><span class="pre">panic</span></code>，使其在 panic 时能打印错误发生的位置。
 相关代码位于 <code class="docutils literal notranslate"><span class="pre">os/src/lang_items.rs</span></code> 中。</p>
 <p>我们还使用第三方库 <code class="docutils literal notranslate"><span class="pre">log</span></code> 为你实现了日志模块，相关代码位于 <code class="docutils literal notranslate"><span class="pre">os/src/logging.rs</span></code> 中。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 cargo 项目中引入外部库 log，需要修改 <code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code>，并在代码中声明 <code class="docutils literal notranslate"><span class="pre">extern</span> <span class="pre">crate</span> <span class="pre">log</span></code></p>
+</div>
 <p>现在，让我们重复一遍本章开头的试验，<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">LOG=TRACE</span></code>！</p>
 <div class="figure align-center">
 <img alt="../_images/color-demo.png" src="../_images/color-demo.png" />

@@ -325,8 +325,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 但我们需要用专门为操作系统准备的内核栈，而不是应用程序运行时用到的用户栈。</p>
 <p>我们声明两个类型 <code class="docutils literal notranslate"><span class="pre">KernelStack</span></code> 和 <code class="docutils literal notranslate"><span class="pre">UserStack</span></code> 分别表示用户栈和内核栈，它们都只是字节数组的简单包装：</p>
 <p>两个栈以全局变量的形式实例化在批处理操作系统的 <code class="docutils literal notranslate"><span class="pre">.bss</span></code> 段中。</p>
-<p>我们为两个类型实现了 <code class="docutils literal notranslate"><span class="pre">get_sp</span></code> 方法来获取栈顶地址。由于在 RISC-V 中栈是向下增长的，我们只需返回包裹的数组的结尾地址，以用户栈
-类型 <code class="docutils literal notranslate"><span class="pre">UserStack</span></code> 为例：</p>
+<p>我们为两个类型实现了 <code class="docutils literal notranslate"><span class="pre">get_sp</span></code> 方法来获取栈顶地址。由于在 RISC-V 中栈是向下增长的，
+我们只需返回包裹的数组的结尾地址，以用户栈类型 <code class="docutils literal notranslate"><span class="pre">UserStack</span></code> 为例：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">impl</span><span class="w"> </span><span class="n">UserStack</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="linenos">2</span><span class="w">    </span><span class="k">fn</span> <span class="nf">get_sp</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">usize</span> <span class="p">{</span><span class="w"></span>
 <span class="linenos">3</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">USER_STACK_SIZE</span><span class="w"></span>
@@ -334,7 +334,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">5</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>于是换栈是非常简单的，只需将 <code class="docutils literal notranslate"><span class="pre">sp</span></code> 寄存器的值修改为 <code class="docutils literal notranslate"><span class="pre">get_sp</span></code> 的返回值即可。</p>
+<p>换栈是非常简单的，只需将 <code class="docutils literal notranslate"><span class="pre">sp</span></code> 寄存器的值修改为 <code class="docutils literal notranslate"><span class="pre">get_sp</span></code> 的返回值即可。</p>
 <p id="term-trap-context">接下来是 Trap 上下文，即在 Trap 发生时需要保存的物理资源内容，定义如下：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// os/src/trap/context.rs</span>
 <span class="linenos">2</span>
@@ -479,7 +479,7 @@ Trap 嵌套的情况使得它们的值被覆盖掉。所以我们需要将它们
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>第 8 行比较奇怪我们暂且不管，假设它从未发生，那么 sp 仍然指向内核栈的栈顶。</p></li>
+<li><p>第 8 行比较奇怪，我们暂且不管，假设它从未发生，那么 sp 仍然指向内核栈的栈顶。</p></li>
 <li><p>第 11~24 行负责从内核栈顶的 Trap 上下文恢复通用寄存器和 CSR 。注意我们要先恢复 CSR 再恢复通用寄存器，这样我们使用的三个临时寄存器
 才能被正确恢复。</p></li>
 <li><p>在第 26 行之前，sp 指向保存了 Trap 上下文之后的内核栈栈顶， sscratch 指向用户栈栈顶。我们在第 26 行在内核栈上回收 Trap 上下文所

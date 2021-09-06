@@ -290,7 +290,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">7</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>我们使用 Rust 的宏将其函数符号 <code class="docutils literal notranslate"><span class="pre">main</span></code> 标志为弱链接。这样在最后链接的时候，
+<p>我们使用 Rust 宏将其标志为弱链接。这样在最后链接的时候，
 虽然 <code class="docutils literal notranslate"><span class="pre">lib.rs</span></code> 和 <code class="docutils literal notranslate"><span class="pre">bin</span></code> 目录下的某个应用程序中都有 <code class="docutils literal notranslate"><span class="pre">main</span></code> 符号，
 但由于 <code class="docutils literal notranslate"><span class="pre">lib.rs</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">main</span></code> 符号是弱链接，
 链接器会使用 <code class="docutils literal notranslate"><span class="pre">bin</span></code> 目录下的函数作为 <code class="docutils literal notranslate"><span class="pre">main</span></code> 。
@@ -313,8 +313,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 由于应用程序运行在用户态（即 U 模式）， <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 指令会触发名为 <code class="docutils literal notranslate"><span class="pre">Environment</span> <span class="pre">call</span> <span class="pre">from</span> <span class="pre">U-mode</span></code> 的异常，
 并 Trap 进入 S 模式执行批处理系统针对这个异常特别提供的服务程序。
 这个接口被称为 ABI 或者系统调用。
-现在我们不关心 S 态的批处理系统如何提供应用程序所需的功能，只是使用它即可。</p>
-<p>在本章中，应用程序和批处理系统之间按照API的结构，约定如下两个系统调用：</p>
+现在我们不关心 S 态的批处理系统如何提供应用程序所需的功能，只考虑如何使用它。</p>
+<p>在本章中，应用程序和批处理系统约定如下两个系统调用：</p>
 <div class="literal-block-wrapper docutils container" id="id11">
 <div class="code-block-caption"><span class="caption-text">第二章新增系统调用</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="sd">/// 功能：将内存中缓冲区中的数据写入文件。</span>
@@ -333,16 +333,14 @@ commentsRunWhenDOMLoaded(addUtterances);
 </pre></div>
 </div>
 </div>
-<p>在实际调用的时候，我们需要按照 RISC-V 调用规范在合适的寄存器中放置系统调用的参数，
+<p>实际调用时，我们要按照 RISC-V 调用规范，在合适的寄存器中放置参数，
 然后执行 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 指令触发 Trap。当 Trap 结束，回到 U 模式后，
-用户程序会从 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 的下一条指令继续执行，同时能在合适的寄存器中读取返回值。</p>
+用户程序会从 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 的下一条指令继续执行，同时在合适的寄存器中读取返回值。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>RISC-V 寄存器编号从 <code class="docutils literal notranslate"><span class="pre">0~31</span></code> ，表示为 <code class="docutils literal notranslate"><span class="pre">x0~x31</span></code> 。 其中：</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">x10~x17</span></code> : 对应  <code class="docutils literal notranslate"><span class="pre">a0~a7</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">x1</span></code> ：对应 <code class="docutils literal notranslate"><span class="pre">ra</span></code></p></li>
-</ul>
+<p>RISC-V 寄存器编号从 <code class="docutils literal notranslate"><span class="pre">0~31</span></code> ，表示为 <code class="docutils literal notranslate"><span class="pre">x0~x31</span></code> 。 其中：
+-  <code class="docutils literal notranslate"><span class="pre">x10~x17</span></code> : 对应  <code class="docutils literal notranslate"><span class="pre">a0~a7</span></code>
+-  <code class="docutils literal notranslate"><span class="pre">x1</span></code> ：对应 <code class="docutils literal notranslate"><span class="pre">ra</span></code></p>
 </div>
 <p>约定寄存器 <code class="docutils literal notranslate"><span class="pre">a0~a6</span></code> 保存系统调用的参数， <code class="docutils literal notranslate"><span class="pre">a0~a1</span></code> 保存系统调用的返回值，
 寄存器 <code class="docutils literal notranslate"><span class="pre">a7</span></code> 用来传递 syscall ID。
@@ -399,7 +397,7 @@ Rust 编译器无法判定汇编代码的安全性，所以我们需要将其包
 </pre></div>
 </div>
 <p>在 <code class="docutils literal notranslate"><span class="pre">console</span></code> 子模块中，借助 <code class="docutils literal notranslate"><span class="pre">write</span></code>，我们为应用程序实现了 <code class="docutils literal notranslate"><span class="pre">println!</span></code> 宏。
-传入到 <code class="docutils literal notranslate"><span class="pre">write</span></code> 的 <code class="docutils literal notranslate"><span class="pre">fd</span></code> 参数设置为 1，代表标准输出，我们暂时不需要考虑其他的 <code class="docutils literal notranslate"><span class="pre">fd</span></code> 选取情况。</p>
+传入到 <code class="docutils literal notranslate"><span class="pre">write</span></code> 的 <code class="docutils literal notranslate"><span class="pre">fd</span></code> 参数设置为 1，代表标准输出 STDOUT，暂时不用考虑其他的 <code class="docutils literal notranslate"><span class="pre">fd</span></code> 选取情况。</p>
 </div>
 </div>
 <div class="section" id="id10">
