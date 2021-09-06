@@ -132,8 +132,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1"><a class="reference internal" href="../chapter3/index.html">第三章：多道程序与分时多任务</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">第四章：地址空间</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1rust-dynamic-allocation.html">Rust 中的动态内存分配</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2address-space.html">地址空间</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html">实现 SV39 多级页表机制（上）</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4sv39-implementation-2.html">实现 SV39 多级页表机制（下）</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5kernel-app-spaces.html">内核与应用的地址空间</a></li>
@@ -147,7 +145,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
@@ -234,39 +232,16 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="0intro.html#id5">本章代码导读</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="1rust-dynamic-allocation.html">Rust 中的动态内存分配</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="1rust-dynamic-allocation.html#id1">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1rust-dynamic-allocation.html#id2">静态与动态内存分配</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="1rust-dynamic-allocation.html#id3">静态分配</a></li>
-<li class="toctree-l3"><a class="reference internal" href="1rust-dynamic-allocation.html#id4">动态分配</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="1rust-dynamic-allocation.html#rust-heap-data-structures">Rust 中的堆数据结构</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1rust-dynamic-allocation.html#id7">在内核中支持动态内存分配</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="2address-space.html">地址空间</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="2address-space.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2address-space.html#id3">虚拟地址与地址空间</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="2address-space.html#id4">地址虚拟化出现之前</a></li>
-<li class="toctree-l3"><a class="reference internal" href="2address-space.html#id5">加一层抽象加强内存管理</a></li>
-<li class="toctree-l3"><a class="reference internal" href="2address-space.html#id6">增加硬件加速虚实地址转换</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="2address-space.html#id7">分段内存管理</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2address-space.html#id8">分页内存管理</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="3sv39-implementation-1.html">实现 SV39 多级页表机制（上）</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id1">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id2">虚拟地址和物理地址</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id2">本节导读</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id3">虚拟地址和物理地址</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="3sv39-implementation-1.html#csr">内存控制相关的CSR寄存器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="3sv39-implementation-1.html#id3">地址格式与组成</a></li>
-<li class="toctree-l3"><a class="reference internal" href="3sv39-implementation-1.html#id4">地址相关的数据结构抽象与类型定义</a></li>
+<li class="toctree-l3"><a class="reference internal" href="3sv39-implementation-1.html#id4">地址格式与组成</a></li>
+<li class="toctree-l3"><a class="reference internal" href="3sv39-implementation-1.html#id5">地址相关的数据结构抽象与类型定义</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id5">页表项的数据结构抽象与类型定义</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id6">多级页表原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id6">页表项的数据结构抽象与类型定义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html#id7">多级页表原理</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="4sv39-implementation-2.html">实现 SV39 多级页表机制（下）</a><ul>
@@ -315,13 +290,11 @@ commentsRunWhenDOMLoaded(addUtterances);
 </li>
 <li class="toctree-l1"><a class="reference internal" href="7exercise.html">chapter4练习</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="7exercise.html#id1">编程作业</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="7exercise.html#id2">申请内存</a></li>
-<li class="toctree-l3"><a class="reference internal" href="7exercise.html#id3">实验要求</a></li>
-<li class="toctree-l3"><a class="reference internal" href="7exercise.html#id4">实验检查</a></li>
+<li class="toctree-l3"><a class="reference internal" href="7exercise.html#id2">实验检查</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="7exercise.html#id5">问答作业</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7exercise.html#id6">报告要求</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7exercise.html#id3">问答作业</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7exercise.html#id4">报告要求</a></li>
 </ul>
 </li>
 </ul>

@@ -133,8 +133,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1multi-loader.html">多道程序放置与加载</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2task-switching.html">任务切换</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html">多道程序与协作式调度</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html">分时多任务系统与抢占式调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html">管理多道程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html">分时多任务系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5exercise.html">chapter3练习</a></li>
 </ul>
 </li>
@@ -145,7 +145,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
@@ -226,41 +226,29 @@ commentsRunWhenDOMLoaded(addUtterances);
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="0intro.html">引言</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id2">本章导读</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="0intro.html#id3">协作式操作系统</a></li>
-<li class="toctree-l3"><a class="reference internal" href="0intro.html#id4">抢占式操作系统</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id8">实践体验</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id9">本章代码树</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id10">本章代码导读</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0intro.html#id2">本章导读</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0intro.html#id3">实践体验</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0intro.html#id4">本章代码树</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="1multi-loader.html">多道程序放置与加载</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="1multi-loader.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1multi-loader.html#id5">多道程序放置</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1multi-loader.html#id7">多道程序加载</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1multi-loader.html#id8">执行应用程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1multi-loader.html#id2">多道程序放置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1multi-loader.html#id3">多道程序加载</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="2task-switching.html">任务切换</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="2task-switching.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2task-switching.html#id3">任务的概念形成</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2task-switching.html#id4">不同类型的上下文与切换</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2task-switching.html#id5">任务切换的设计与实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2task-switching.html#id2">任务切换的设计与实现</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="3multiprogramming.html">多道程序与协作式调度</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#yield">多道程序背景与 yield 系统调用</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id3">任务控制块与任务运行状态</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id4">任务管理器</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3multiprogramming.html">管理多道程序</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#yield">yield 系统调用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id2">任务控制块与任务运行状态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id3">任务管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#sys-yield-sys-exit">实现 sys_yield 和 sys_exit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id5">第一次进入用户态</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id6">三叠纪“始初龙”协作式操作系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html#id4">第一次进入用户态</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="4time-sharing-system.html">分时多任务系统与抢占式调度</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="4time-sharing-system.html">分时多任务系统</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html#id2">本节导读</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="4time-sharing-system.html#id3">分时多任务系统的背景</a></li>
 <li class="toctree-l3"><a class="reference internal" href="4time-sharing-system.html#id4">时间片轮转调度</a></li>
@@ -269,19 +257,16 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html#risc-v">RISC-V 架构中的中断</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html#id5">时钟中断与计时器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html#id6">抢占式调度</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html#id7">三叠纪“腔骨龙”抢占式操作系统</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="5exercise.html">chapter3练习</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="5exercise.html#id1">编程作业</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="5exercise.html#stride">stride 调度算法</a></li>
 <li class="toctree-l3"><a class="reference internal" href="5exercise.html#id2">实验要求</a></li>
-<li class="toctree-l3"><a class="reference internal" href="5exercise.html#id3">实验约定</a></li>
-<li class="toctree-l3"><a class="reference internal" href="5exercise.html#id4">实验检查</a></li>
+<li class="toctree-l3"><a class="reference internal" href="5exercise.html#id3">实验检查</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="5exercise.html#id5">简答作业</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5exercise.html#id7">报告要求</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5exercise.html#id4">简答作业</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5exercise.html#id5">报告要求</a></li>
 </ul>
 </li>
 </ul>

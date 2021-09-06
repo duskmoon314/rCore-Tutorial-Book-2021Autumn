@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>分时多任务系统与抢占式调度 &mdash; rCore-Tutorial-Book-Autumn2021 0.1 文档</title>
+  <title>分时多任务系统 &mdash; rCore-Tutorial-Book-Autumn2021 0.1 文档</title>
   
 
   
@@ -79,7 +79,7 @@ commentsRunWhenDOMLoaded(addUtterances);
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
     <link rel="next" title="chapter3练习" href="5exercise.html" />
-    <link rel="prev" title="多道程序与协作式调度" href="3multiprogramming.html" /> 
+    <link rel="prev" title="管理多道程序" href="3multiprogramming.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -133,8 +133,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1multi-loader.html">多道程序放置与加载</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2task-switching.html">任务切换</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html">多道程序与协作式调度</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">分时多任务系统与抢占式调度</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html">管理多道程序</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">分时多任务系统</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">本节导读</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id3">分时多任务系统的背景</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">时间片轮转调度</a></li>
@@ -143,7 +143,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l3"><a class="reference internal" href="#risc-v">RISC-V 架构中的中断</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">时钟中断与计时器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id6">抢占式调度</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">三叠纪“腔骨龙”抢占式操作系统</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="5exercise.html">chapter3练习</a></li>
@@ -156,7 +155,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
@@ -215,7 +214,7 @@ commentsRunWhenDOMLoaded(addUtterances);
         
           <li><a href="index.html">第三章：多道程序与分时多任务</a> &raquo;</li>
         
-      <li>分时多任务系统与抢占式调度</li>
+      <li>分时多任务系统</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -235,7 +234,7 @@ commentsRunWhenDOMLoaded(addUtterances);
            <div itemprop="articleBody">
             
   <div class="section" id="id1">
-<h1>分时多任务系统与抢占式调度<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<h1>分时多任务系统<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id2">
 <h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>本节的重点是操作系统对中断的处理和对应用程序的抢占。为此，对 <strong>任务</strong> 的概念进行进一步扩展和延伸：</p>
@@ -268,8 +267,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p>而对于中断，可以想象为想发起中断的是一套完全不同的电路（从时钟中断来看就是简单的计数和比较器），这套电路仅通过一根导线接入进来，当想要触发中断的时候则输入一个高电平或正边沿，处理器会在每执行完一条指令之后检查一下这根线，看情况决定是继续执行接下来的指令还是进入中断处理流程。也就是说，大多数情况下，指令执行的相关硬件单元和可能发起中断的电路是完全独立 <strong>并行</strong> (Parallel) 运行的，它们中间只有一根导线相连，除此之外指令执行的那些单元就完全不知道对方处于什么状态了。</p>
 </div>
 <p>在不考虑指令集拓展的情况下，RISC-V 架构中定义了如下中断：</p>
-<table class="colwidths-given docutils align-center" id="id8">
-<caption><span class="caption-text">RISC-V 中断一览表</span><a class="headerlink" href="#id8" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-center" id="id7">
+<caption><span class="caption-text">RISC-V 中断一览表</span><a class="headerlink" href="#id7" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 25%" />
@@ -396,8 +395,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">timer</span></code> 子模块的 <code class="docutils literal notranslate"><span class="pre">get_time_ms</span></code> 可以以毫秒为单位返回当前计数器的值，这让我们终于能对时间有一个具体概念了。实现原理就不再赘述。</p>
 <p>我们也新增一个系统调用方便应用获取当前的时间，以毫秒为单位：</p>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">第三章新增系统调用（二）</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">第三章新增系统调用（二）</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="sd">/// 功能：获取当前的时间，以毫秒为单位。</span>
 <span class="sd">/// 返回值：返回当前的时间，以毫秒为单位。</span>
 <span class="sd">/// syscall ID：169</span>
@@ -468,10 +467,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 </div>
 <p>它的功能是等待 3000ms 然后退出。可以看出，我们会在循环里面 <code class="docutils literal notranslate"><span class="pre">yield_</span></code> 来主动交出 CPU 而不是无意义的忙等。尽管我们不这样做，已有的抢占式调度还是会在它循环 10ms 之后切换到其他应用，但是这样能让内核给其他应用分配更多的 CPU 资源并让它们更早运行结束。</p>
 </div>
-<div class="section" id="id7">
-<h2>三叠纪“腔骨龙”抢占式操作系统<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
-<p>简介与画图！！！</p>
-</div>
 </div>
 
 
@@ -481,7 +476,7 @@ commentsRunWhenDOMLoaded(addUtterances);
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="5exercise.html" class="btn btn-neutral float-right" title="chapter3练习" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="3multiprogramming.html" class="btn btn-neutral float-left" title="多道程序与协作式调度" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+        <a href="3multiprogramming.html" class="btn btn-neutral float-left" title="管理多道程序" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
     </div>
 
   <hr/>

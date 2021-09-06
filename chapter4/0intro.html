@@ -78,7 +78,7 @@ commentsRunWhenDOMLoaded(addUtterances);
     
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="Rust 中的动态内存分配" href="1rust-dynamic-allocation.html" />
+    <link rel="next" title="实现 SV39 多级页表机制（上）" href="3sv39-implementation-1.html" />
     <link rel="prev" title="第四章：地址空间" href="index.html" /> 
 </head>
 
@@ -138,8 +138,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l3"><a class="reference internal" href="#id5">本章代码导读</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="1rust-dynamic-allocation.html">Rust 中的动态内存分配</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2address-space.html">地址空间</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3sv39-implementation-1.html">实现 SV39 多级页表机制（上）</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4sv39-implementation-2.html">实现 SV39 多级页表机制（下）</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5kernel-app-spaces.html">内核与应用的地址空间</a></li>
@@ -153,7 +151,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
@@ -282,59 +280,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="gp">$ </span>make run
 </pre></div>
 </div>
-<p>将 Maix 系列开发板连接到 PC，并在上面运行本章代码：</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> os
-<span class="gp">$ </span>make run <span class="nv">BOARD</span><span class="o">=</span>k210
-</pre></div>
-</div>
-<p>如果顺利的话，我们将看到和上一章相同的运行结果（以 K210 平台为例）：</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[rustsbi] RustSBI version 0.1.1
-.______       __    __      _______.___________.  _______..______   __
-|   _  \     |  |  |  |    /       |           | /       ||   _  \ |  |
-|  |_)  |    |  |  |  |   |   (----`---|  |----`|   (----`|  |_)  ||  |
-|      /     |  |  |  |    \   \       |  |      \   \    |   _  &lt; |  |
-|  |\  \----.|  `--&#39;  |.----)   |      |  |  .----)   |   |  |_)  ||  |
-| _| `._____| \______/ |_______/       |__|  |_______/    |______/ |__|
-
-[rustsbi] Platform: K210 (Version 0.1.0)
-[rustsbi] misa: RV64ACDFIMSU
-[rustsbi] mideleg: 0x22
-[rustsbi] medeleg: 0x1ab
-[rustsbi] Kernel entry: 0x80020000
-[kernel] Hello, world!
-.text [0x80020000, 0x8002b000)
-.rodata [0x8002b000, 0x8002e000)
-.data [0x8002e000, 0x8004c000)
-.bss [0x8004c000, 0x8035d000)
-mapping .text section
-mapping .rodata section
-mapping .data section
-mapping .bss section
-mapping physical memory
-[kernel] back to world!
-remap_test passed!
-init TASK_MANAGER
-num_app = 4
-power_3 [10000/300000power_5 [10000/210000]
-power_5 [20000/210000]
-power_5 [30000/210000]
-
-...
-
-(mod 998244353)
-Test power_7 OK!
-[kernel] Application exited with code 0
-power_3 [290000/300000]
-power_3 [300000/300000]
-3^300000 = 612461288(mod 998244353)
-Test power_3 OK!
-[kernel] Application exited with code 0
-Test sleep OK!
-[kernel] Application exited with code 0
-[kernel] Panicked at src/task/mod.rs:112 All applications completed!
-[rustsbi] reset triggered! todo: shutdown all harts on k210; program halt. Type: 0, reason: 0
-</pre></div>
-</div>
+<p>如果顺利的话，我们将看到和上一章相同的运行结果。</p>
 </div>
 <div class="section" id="id4">
 <h2>本章代码树<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
@@ -442,7 +388,7 @@ Test sleep OK!
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="1rust-dynamic-allocation.html" class="btn btn-neutral float-right" title="Rust 中的动态内存分配" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="3sv39-implementation-1.html" class="btn btn-neutral float-right" title="实现 SV39 多级页表机制（上）" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="index.html" class="btn btn-neutral float-left" title="第四章：地址空间" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
     </div>
 

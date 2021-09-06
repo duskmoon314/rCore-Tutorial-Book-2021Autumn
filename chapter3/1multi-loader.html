@@ -133,15 +133,13 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">第三章：多道程序与分时多任务</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">多道程序放置与加载</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">本节导读</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">多道程序放置</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">多道程序加载</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">执行应用程序</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">多道程序放置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">多道程序加载</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="2task-switching.html">任务切换</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html">多道程序与协作式调度</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html">分时多任务系统与抢占式调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3multiprogramming.html">管理多道程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4time-sharing-system.html">分时多任务系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5exercise.html">chapter3练习</a></li>
 </ul>
 </li>
@@ -152,7 +150,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
@@ -233,96 +231,58 @@ commentsRunWhenDOMLoaded(addUtterances);
   <div class="section" id="id1">
 <h1>多道程序放置与加载<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id2">
-<h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>本节我们将实现可以把多个应用放置到内存中的二叠纪“锯齿螈” <a class="footnote-reference brackets" href="#prionosuchus" id="id3">1</a> 操作系统。能实现二叠纪“锯齿螈”操作系统的一个重要前提是计算机中物理内存容量增加了，足以容纳多个应用程序的内容。在计算机的发展史上，我们也确实看到，随着集成电路的快速发展，计算机的内存容量也越来越大了。</p>
-<p>在本章的引言中我们提到每个应用都需要按照它的编号被分别放置并加载到内存中不同的位置。本节我们就来介绍多应用的内存放置是如何实现的。通过具体实现，可以看到多个应用程序被一次性地加载到内存中，这样在切换到另外一个应用程序执行会很快，不像前一章介绍的操作系统，还要有清空前一个应用，然后加载当前应用的过程与开销。</p>
-<p>但我们也会了解到，每个应用程序需要知道自己运行时在内存中的不同位置，这对应用程序的编写带来了一定的麻烦。而且操作系统也要知道每个应用程序运行时的位置，不能任意移动应用程序所在的内存空间，即不能在运行时根据内存空间的动态空闲情况，把应用程序调整到合适的空闲空间中。这是“锯齿螈” <a class="footnote-reference brackets" href="#prionosuchus" id="id4">1</a> 操作系统在动态内存管理上的不足之处。</p>
-</div>
-<div class="section" id="id5">
-<h2>多道程序放置<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
-<p>与第二章相同，所有应用的 ELF格式的执行文件都经过 <code class="docutils literal notranslate"><span class="pre">objcopy</span></code> 工具丢掉所有 ELF header 和符号变为二进制镜像文件，随后以同样的格式通过在操作系统内核中嵌入 <code class="docutils literal notranslate"><span class="pre">link_user.S</span></code> 文件，在编译时直接把应用链接到内核的数据段中。不同的是，我们对相关模块进行了调整：在第二章中应用的加载和执行进度控制都交给 <code class="docutils literal notranslate"><span class="pre">batch</span></code> 子模块，而在第三章中我们将应用的加载这部分功能分离出来在 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 子模块中实现，应用的执行和切换功能则交给 <code class="docutils literal notranslate"><span class="pre">task</span></code> 子模块。</p>
-<p>注意，我们需要调整每个应用被构建时使用的链接脚本 <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code> 中的起始地址 <code class="docutils literal notranslate"><span class="pre">BASE_ADDRESS</span></code> ，这个地址是应用被内核加载到内存中的起始地址。也就是要做到：应用知道自己会被加载到某个地址运行，而内核也确实能做到将它加载到那个地址。这算是应用和内核在某种意义上达成的一种协议。之所以要有这么苛刻的条件，是因为目前的操作系统内核的能力还是比较弱的，对应用程序通用性的支持也不够，这也进一步导致了应用程序的通用性不够（比如不支持被加载到内存中的任意地址运行）。事实上，目前应用程序的编址方式是基于绝对位置的，并没做到与位置无关，内核也没有提供相应的地址重定位机制。</p>
+<h2>多道程序放置<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>在第二章中，内核让所有应用都共享同一个固定的起始地址。
+正因如此，内存中同时最多只能驻留一个应用，</p>
+<p>要一次加载运行多个程序，就要求每个用户程序被内核加载到内存中的起始地址都不同。
+为此，我们编写脚本 <code class="docutils literal notranslate"><span class="pre">user/build.py</span></code> 为每个应用定制各自的起始地址。
+它的思路很简单，对于每一个应用程序：</p>
+<ul class="simple">
+<li><p>找到 <code class="docutils literal notranslate"><span class="pre">src/linker.ld</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">BASE_ADDRESS</span> <span class="pre">=</span> <span class="pre">0x80400000;</span></code> 这一行，并将后面的地址
+替换为 <code class="docutils literal notranslate"><span class="pre">0x80400000</span> <span class="pre">+</span> <span class="pre">app_id</span> <span class="pre">*</span> <span class="pre">0x20000</span></code>；</p></li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">build</span> <span class="pre">--bin</span></code> 构建当前应用；</p></li>
+<li><p>将 <code class="docutils literal notranslate"><span class="pre">src/linker.ld</span></code> 还原。</p></li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>对于编址方式，需要再回顾一下编译原理课讲解的后端代码生成技术，以及计算机组成原理课的指令寻址方式的内容。可以在 <a class="reference external" href="https://nju-projectn.github.io/ics-pa-gitbook/ics2020/4.2.html">这里</a> 找到更多有关
-位置无关和重定位的说明。</p>
+<p>qemu 预留的内存空间是有限的，如果加载的程序过多，程序地址超出内存空间，可能出现 <code class="docutils literal notranslate"><span class="pre">core</span> <span class="pre">dumped</span></code>.</p>
 </div>
-<p>由于每个应用被加载到的位置都不同，也就导致它们的链接脚本 <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">BASE_ADDRESS</span></code> 都是不同的。实际上，
-我们不是直接用 <code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">build</span></code> 构建应用的链接脚本，而是写了一个脚本定制工具 <code class="docutils literal notranslate"><span class="pre">build.py</span></code> ，为每个应用定制了各自的链接脚本：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span> <span class="c1"># user/build.py</span>
-<span class="linenos"> 2</span>
-<span class="linenos"> 3</span> <span class="kn">import</span> <span class="nn">os</span>
-<span class="linenos"> 4</span>
-<span class="linenos"> 5</span> <span class="n">base_address</span> <span class="o">=</span> <span class="mh">0x80400000</span>
-<span class="linenos"> 6</span> <span class="n">step</span> <span class="o">=</span> <span class="mh">0x20000</span>
-<span class="linenos"> 7</span> <span class="n">linker</span> <span class="o">=</span> <span class="s1">&#39;src/linker.ld&#39;</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span> <span class="n">app_id</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="linenos">10</span> <span class="n">apps</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s1">&#39;src/bin&#39;</span><span class="p">)</span>
-<span class="linenos">11</span> <span class="n">apps</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-<span class="linenos">12</span> <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">apps</span><span class="p">:</span>
-<span class="linenos">13</span>     <span class="n">app</span> <span class="o">=</span> <span class="n">app</span><span class="p">[:</span><span class="n">app</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)]</span>
-<span class="linenos">14</span>     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos">15</span>     <span class="n">lines_before</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos">16</span>     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">linker</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="linenos">17</span>         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-<span class="linenos">18</span>             <span class="n">lines_before</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-<span class="linenos">19</span>             <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">base_address</span><span class="p">),</span> <span class="nb">hex</span><span class="p">(</span><span class="n">base_address</span><span class="o">+</span><span class="n">step</span><span class="o">*</span><span class="n">app_id</span><span class="p">))</span>
-<span class="linenos">20</span>             <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-<span class="linenos">21</span>     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">linker</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="linenos">22</span>         <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-<span class="linenos">23</span>     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;cargo build --bin </span><span class="si">%s</span><span class="s1"> --release&#39;</span> <span class="o">%</span> <span class="n">app</span><span class="p">)</span>
-<span class="linenos">24</span>     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[build.py] application </span><span class="si">%s</span><span class="s1"> start with address </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">base_address</span><span class="o">+</span><span class="n">step</span><span class="o">*</span><span class="n">app_id</span><span class="p">)))</span>
-<span class="linenos">25</span>     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">linker</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="linenos">26</span>         <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">lines_before</span><span class="p">)</span>
-<span class="linenos">27</span>     <span class="n">app_id</span> <span class="o">=</span> <span class="n">app_id</span> <span class="o">+</span> <span class="mi">1</span>
-</pre></div>
 </div>
-<p>它的思路很简单，在遍历 <code class="docutils literal notranslate"><span class="pre">app</span></code> 的大循环里面只做了这样几件事情：</p>
-<ul class="simple">
-<li><p>第 16~22 行，找到 <code class="docutils literal notranslate"><span class="pre">src/linker.ld</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">BASE_ADDRESS</span> <span class="pre">=</span> <span class="pre">0x80400000;</span></code> 这一行，并将后面的地址
-替换为和当前应用对应的一个地址；</p></li>
-<li><p>第 23 行，使用 <code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">build</span></code> 构建当前的应用，注意我们可以使用 <code class="docutils literal notranslate"><span class="pre">--bin</span></code> 参数来只构建某一个应用；</p></li>
-<li><p>第 25~26 行，将 <code class="docutils literal notranslate"><span class="pre">src/linker.ld</span></code> 还原。</p></li>
-</ul>
-</div>
-<div class="section" id="id7">
-<h2>多道程序加载<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
-<p>应用的加载方式也和上一章的有所不同。上一章中讲解的加载方法是让所有应用都共享同一个固定的加载物理地址。也是因为这个原因，内存中同时最多只能驻留一个应用，当它运行完毕或者出错退出的时候由操作系统的 <code class="docutils literal notranslate"><span class="pre">batch</span></code> 子模块加载一个新的应用来替换掉它。本章中，所有的应用在内核初始化的时候就一并被加载到内存中。为了避免覆盖，它们自然需要被加载到不同的物理地址。这是通过调用 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 子模块的 <code class="docutils literal notranslate"><span class="pre">load_apps</span></code> 函数实现的：</p>
+<div class="section" id="id3">
+<h2>多道程序加载<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>在第二章中负责应用加载和执行的子模块 <code class="docutils literal notranslate"><span class="pre">batch</span></code> 被拆分为 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 和 <code class="docutils literal notranslate"><span class="pre">task</span></code> ，
+前者负责启动时加载应用程序，后者负责切换和调度。</p>
+<p>其中， <code class="docutils literal notranslate"><span class="pre">loader</span></code> 模块的 <code class="docutils literal notranslate"><span class="pre">load_apps</span></code> 函数负责将所有用户程序在内核初始化的时一并加载进内存。</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="c1">// os/src/loader.rs</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="w"> </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">load_apps</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">     </span><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">fn</span> <span class="nf">_num_app</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">     </span><span class="kd">let</span><span class="w"> </span><span class="n">num_app_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_num_app</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="w">     </span><span class="kd">let</span><span class="w"> </span><span class="n">num_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_num_app</span><span class="p">();</span><span class="w"></span>
-<span class="linenos"> 7</span><span class="w">     </span><span class="kd">let</span><span class="w"> </span><span class="n">app_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 8</span><span class="w">         </span><span class="n">core</span>::<span class="n">slice</span>::<span class="n">from_raw_parts</span><span class="p">(</span><span class="n">num_app_ptr</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">num_app</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">     </span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">     </span><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">         </span><span class="k">fn</span> <span class="nf">_num_app</span><span class="p">();</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="kd">let</span><span class="w"> </span><span class="n">num_app_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_num_app</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">     </span><span class="kd">let</span><span class="w"> </span><span class="n">num_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_num_app</span><span class="p">();</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">     </span><span class="kd">let</span><span class="w"> </span><span class="n">app_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">core</span>::<span class="n">slice</span>::<span class="n">from_raw_parts</span><span class="p">(</span><span class="n">num_app_ptr</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">num_app</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
 <span class="linenos">10</span><span class="w">     </span><span class="c1">// clear i-cache first</span>
-<span class="linenos">11</span><span class="w">     </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="fm">llvm_asm!</span><span class="p">(</span><span class="s">&quot;fence.i&quot;</span><span class="w"> </span>:::: <span class="s">&quot;volatile&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">12</span><span class="w">     </span><span class="c1">// load apps</span>
-<span class="linenos">13</span><span class="w">     </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">num_app</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">         </span><span class="kd">let</span><span class="w"> </span><span class="n">base_i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_base_i</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">         </span><span class="c1">// clear region</span>
-<span class="linenos">16</span><span class="w">         </span><span class="p">(</span><span class="n">base_i</span><span class="o">..</span><span class="n">base_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_SIZE_LIMIT</span><span class="p">).</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">addr</span><span class="o">|</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">17</span><span class="w">             </span><span class="p">(</span><span class="n">addr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u8</span><span class="p">).</span><span class="n">write_volatile</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="linenos">18</span><span class="w">         </span><span class="p">});</span><span class="w"></span>
-<span class="linenos">19</span><span class="w">         </span><span class="c1">// load app from data section to memory</span>
-<span class="linenos">20</span><span class="w">         </span><span class="kd">let</span><span class="w"> </span><span class="n">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">21</span><span class="w">             </span><span class="n">core</span>::<span class="n">slice</span>::<span class="n">from_raw_parts</span><span class="p">(</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">                 </span><span class="n">app_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">23</span><span class="w">                 </span><span class="n">app_start</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">app_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"></span>
-<span class="linenos">24</span><span class="w">             </span><span class="p">)</span><span class="w"></span>
-<span class="linenos">25</span><span class="w">         </span><span class="p">};</span><span class="w"></span>
-<span class="linenos">26</span><span class="w">         </span><span class="kd">let</span><span class="w"> </span><span class="n">dst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">27</span><span class="w">             </span><span class="n">core</span>::<span class="n">slice</span>::<span class="n">from_raw_parts_mut</span><span class="p">(</span><span class="n">base_i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">.</span><span class="n">len</span><span class="p">())</span><span class="w"></span>
-<span class="linenos">28</span><span class="w">         </span><span class="p">};</span><span class="w"></span>
-<span class="linenos">29</span><span class="w">         </span><span class="n">dst</span><span class="p">.</span><span class="n">copy_from_slice</span><span class="p">(</span><span class="n">src</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">30</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">31</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">     </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">         </span><span class="fm">asm!</span><span class="p">(</span><span class="s">&quot;fence.i&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">     </span><span class="c1">// load apps</span>
+<span class="linenos">15</span><span class="w">     </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">num_app</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">         </span><span class="kd">let</span><span class="w"> </span><span class="n">base_i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_base_i</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">         </span><span class="c1">// clear region</span>
+<span class="linenos">18</span><span class="w">         </span><span class="p">(</span><span class="n">base_i</span><span class="o">..</span><span class="n">base_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_SIZE_LIMIT</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">             </span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">addr</span><span class="o">|</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="n">addr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u8</span><span class="p">).</span><span class="n">write_volatile</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">});</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">         </span><span class="c1">// load app from data section to memory</span>
+<span class="linenos">21</span><span class="w">         </span><span class="kd">let</span><span class="w"> </span><span class="n">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">             </span><span class="n">core</span>::<span class="n">slice</span>::<span class="n">from_raw_parts</span><span class="p">(</span><span class="n">app_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="n">app_start</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">app_start</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"></span>
+<span class="linenos">23</span><span class="w">         </span><span class="p">};</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">         </span><span class="kd">let</span><span class="w"> </span><span class="n">dst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">core</span>::<span class="n">slice</span>::<span class="n">from_raw_parts_mut</span><span class="p">(</span><span class="n">base_i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">.</span><span class="n">len</span><span class="p">())</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">         </span><span class="n">dst</span><span class="p">.</span><span class="n">copy_from_slice</span><span class="p">(</span><span class="n">src</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">27</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>可以看出，第 <span class="math notranslate nohighlight">\(i\)</span> 个应用被加载到以物理地址 <code class="docutils literal notranslate"><span class="pre">base_i</span></code> 开头的一段物理内存上，而 <code class="docutils literal notranslate"><span class="pre">base_i</span></code> 的计算方式如下：</p>
+<p>第 <span class="math notranslate nohighlight">\(i\)</span> 个应用被加载到以物理地址 <code class="docutils literal notranslate"><span class="pre">base_i</span></code> 开头的一段物理内存上，而 <code class="docutils literal notranslate"><span class="pre">base_i</span></code> 的计算方式如下：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="c1">// os/src/loader.rs</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="w"> </span><span class="k">fn</span> <span class="nf">get_base_i</span><span class="p">(</span><span class="n">app_id</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">usize</span> <span class="p">{</span><span class="w"></span>
@@ -330,22 +290,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">5</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>我们可以在 <code class="docutils literal notranslate"><span class="pre">config</span></code> 子模块中找到这两个常数。从这一章开始， <code class="docutils literal notranslate"><span class="pre">config</span></code> 子模块用来存放内核中所有的常数。看到 <code class="docutils literal notranslate"><span class="pre">APP_BASE_ADDRESS</span></code> 被设置为 <code class="docutils literal notranslate"><span class="pre">0x80400000</span></code> ，而 <code class="docutils literal notranslate"><span class="pre">APP_SIZE_LIMIT</span></code> 和上一章一样被设置为 <code class="docutils literal notranslate"><span class="pre">0x20000</span></code> ，也就是每个应用二进制镜像的大小限制。因此，应用的内存布局就很明朗了——就是从 <code class="docutils literal notranslate"><span class="pre">APP_BASE_ADDRESS</span></code> 开始依次为每个应用预留一段空间。</p>
-<p>这样，我们就说明了多个应用是如何被构建和加载的。</p>
-</div>
-<div class="section" id="id8">
-<h2>执行应用程序<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
-<p>当多道程序的初始化放置工作完成，或者是某个应用程序运行结束或出错的时候，我们要调用 run_next_app 函数切换到下一个应用程序。此时 CPU 运行在 S 特权级的操作系统中，而操作系统希望能够切换到 U 特权级去运行应用程序。这一过程与上章的 <a class="reference internal" href="../chapter2/4trap-handling.html#ch2-app-execution"><span class="std std-ref">执行应用程序</span></a> 一节的描述类似。相对不同的是，操作系统知道每个应用程序预先加载在内存中的位置，这就需要设置应用程序返回的不同 Trap 上下文（Trap上下文中保存了 放置程序起始地址的``epc`` 寄存器内容）：</p>
-<ul class="simple">
-<li><p>跳转到应用程序（编号 <span class="math notranslate nohighlight">\(i\)</span> ）的入口点 <span class="math notranslate nohighlight">\(\text{entry}_i\)</span></p></li>
-<li><p>将使用的栈切换到用户栈 <span class="math notranslate nohighlight">\(\text{stack}_i\)</span></p></li>
-</ul>
-<p>我们的“锯齿螈”操作系统就算是实现完毕了。它支持把多个应用的代码和数据放置到内存中，并能够依次执行每个应用，提高了应用切换的效率，这就达到了本节对操作系统的基本需求。但“锯齿螈”操作系统在任务调度的灵活性上还有很大的改进空间，下一节我们将开始改进这方面的问题。</p>
-<dl class="footnote brackets">
-<dt class="label" id="prionosuchus"><span class="brackets">1</span><span class="fn-backref">(<a href="#id3">1</a>,<a href="#id4">2</a>)</span></dt>
-<dd><p>锯齿螈身长可达9米，是迄今出现过的最大的两栖动物，是二叠纪时期江河湖泊和沼泽中的顶级掠食者。</p>
-</dd>
-</dl>
+<p>我们可以在 <code class="docutils literal notranslate"><span class="pre">config</span></code> 子模块中找到这两个常数， <code class="docutils literal notranslate"><span class="pre">APP_BASE_ADDRESS</span></code> 被设置为 <code class="docutils literal notranslate"><span class="pre">0x80400000</span></code> ，
+而 <code class="docutils literal notranslate"><span class="pre">APP_SIZE_LIMIT</span></code> 和上一章一样被设置为 <code class="docutils literal notranslate"><span class="pre">0x20000</span></code> 。这种放置方式与 <code class="docutils literal notranslate"><span class="pre">user/build.py</span></code> 的实现一致。</p>
 </div>
 </div>
 
