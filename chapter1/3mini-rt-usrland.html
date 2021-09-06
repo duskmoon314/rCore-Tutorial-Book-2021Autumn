@@ -241,9 +241,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <h2>用户态最小化执行环境<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <div class="section" id="id3">
 <h3>执行环境初始化<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<p>首先我们要给编译器提供一个入口函数。
-经查阅资料，我们发现 Rust 编译器要找的入口函数是 <code class="docutils literal notranslate"><span class="pre">_start()</span></code> ，
-于是在 <code class="docutils literal notranslate"><span class="pre">main.rs</span></code> 中添加如下内容：</p>
+<p>首先我们要给 Rust 编译器编译器提供入口函数 <code class="docutils literal notranslate"><span class="pre">_start()</span></code> ，
+在 <code class="docutils literal notranslate"><span class="pre">main.rs</span></code> 中添加如下内容：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/main.rs</span>
 <span class="cp">#[no_mangle]</span><span class="w"></span>
 <span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">_start</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -268,8 +267,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="go">     11122: 01 a0            j       0 &lt;_start+0x2&gt;</span>
 </pre></div>
 </div>
-<p>仔细读读反汇编出的两条指令，发现它就是一个死循环，
-且其第一条指令的地址与入口地址 Entry 的值一致，这说明编译器生成的目标执行程序已经是一个合理的程序了。
+<p>反汇编出的两条指令就是一个死循环，
+这说明编译器生成的已经是一个合理的程序了。
 用 <code class="docutils literal notranslate"><span class="pre">qemu-riscv64</span> <span class="pre">target/riscv64gc-unknown-none-elf/debug/os</span></code> 命令可以执行这个程序。</p>
 </div>
 <div class="section" id="id4">
@@ -292,17 +291,13 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="go">  段错误 (核心已转储)</span>
 </pre></div>
 </div>
-<p>这个非常简单的应用程序导致 <code class="docutils literal notranslate"><span class="pre">qemu-riscv64</span></code> 崩溃了！为什么会这样？</p>
+<p>这个简单的程序导致 <code class="docutils literal notranslate"><span class="pre">qemu-riscv64</span></code> 崩溃了！为什么会这样？</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>QEMU有两种运行模式：</p>
 <p><code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">mode</span></code> 模式，即用户态模拟，如 <code class="docutils literal notranslate"><span class="pre">qemu-riscv64</span></code> 程序，
 能够模拟不同处理器的用户态指令的执行，并可以直接解析ELF可执行文件，
-加载运行那些为不同处理器编译的用户级Linux应用程序；
-在翻译并执行不同应用程序中的不同处理器的指令时，
-如果碰到是系统调用相关的汇编指令，
-它会把不同处理器（如RISC-V）的Linux系统调用转换为本机处理器（如x86-64）上的Linux系统调用，
-这样就可以让本机Linux完成系统调用，并返回结果（再转换成RISC-V能识别的数据）给这些应用。</p>
+加载运行那些为不同处理器编译的用户级Linux应用程序。</p>
 <p><code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">mode</span></code> 模式，即系统态模式，如 <code class="docutils literal notranslate"><span class="pre">qemu-system-riscv64</span></code> 程序，
 能够模拟一个完整的基于不同CPU的硬件系统，包括处理器、内存及其他外部设备，支持运行完整的操作系统。</p>
 </div>
@@ -317,10 +312,10 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="fm">asm!</span><span class="p">(</span><span class="w"></span>
 <span class="w">            </span><span class="s">&quot;ecall&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="n">inlateout</span><span class="p">(</span><span class="s">&quot;x10&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">arg0</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">&quot;x11&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">&quot;x12&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">arg2</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">&quot;x17&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">which</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="n">inlateout</span><span class="p">(</span><span class="s">&quot;x10&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">&quot;x11&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"></span>
+<span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">&quot;x12&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"></span>
+<span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">&quot;x17&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span><span class="n">ret</span><span class="w"></span>
@@ -337,7 +332,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">main.rs</span></code> 增加的内容不多，但还是有点与一般的应用程序有所不同，因为它引入了汇编和系统调用。
-第二章的第二节 <a class="reference internal" href="../chapter2/2application.html"><span class="doc">实现应用程序</span></a> 会详细介绍上述功能的实现细节。
+第二章的第二节 <a class="reference internal" href="../chapter2/2application.html"><span class="doc">实现应用程序</span></a> 会详细介绍上述代码的含义。
 这里读者只需要知道 <code class="docutils literal notranslate"><span class="pre">_start</span></code> 函数调用了一个 <code class="docutils literal notranslate"><span class="pre">sys_exit</span></code> 函数，
 向操作系统发出了退出的系统调用请求，退出码为 <code class="docutils literal notranslate"><span class="pre">9</span></code> 。</p>
 <p>我们编译执行以下修改后的程序：</p>

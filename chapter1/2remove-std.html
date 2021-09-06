@@ -239,7 +239,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </pre></div>
 </div>
 <p>这将使 cargo 工具在 os 目录下默认会使用 riscv64gc-unknown-none-elf 作为目标平台。
-这是编译器运行的平台(x86_64)与可执行文件运行的目标平台(riscv64)不同的情况，被称为 <strong>交叉编译</strong> (Cross Compile)。</p>
+这种编译器运行的平台（x86_64）与可执行文件运行的目标平台不同的情况，称为 <strong>交叉编译</strong> (Cross Compile)。</p>
 <div class="section" id="println">
 <h2>移除 println! 宏<a class="headerlink" href="#println" title="永久链接至标题">¶</a></h2>
 <p>我们在 <code class="docutils literal notranslate"><span class="pre">main.rs</span></code> 的开头加上一行 <code class="docutils literal notranslate"><span class="pre">#![no_std]</span></code>，
@@ -256,7 +256,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </pre></div>
 </div>
 </div>
-<p>我们之前提到过， println! 宏是由标准库 std 提供的，且会使用到一个名为 write 的系统调用。
+<p>println! 宏是由标准库 std 提供的，且会使用到一个名为 write 的系统调用。
 无论如何，我们先将这行代码注释掉。</p>
 </div>
 <div class="section" id="panic-handler">
@@ -269,7 +269,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </pre></div>
 </div>
 </div>
-<p>标准库 std 提供了 Rust 致命错误 panic 的处理函数 <code class="docutils literal notranslate"><span class="pre">#[panic_handler]</span></code>，其大致功能是打印出错位置和原因并杀死当前应用。
+<p>标准库 std 提供了 Rust 错误处理函数 <code class="docutils literal notranslate"><span class="pre">#[panic_handler]</span></code>，其大致功能是打印出错位置和原因并杀死当前应用。
 但核心库 core 并没有提供这项功能，得靠我们自己实现。</p>
 <p>新建一个子模块 <code class="docutils literal notranslate"><span class="pre">lang_items.rs</span></code>，在里面编写 panic 处理函数，通过标记 <code class="docutils literal notranslate"><span class="pre">#[panic_handler]</span></code> 告知编译器采用我们的实现：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/lang_items.rs</span>
@@ -295,7 +295,6 @@ error: requires `start` lang_item
 </div>
 </div>
 <p>编译器提醒我们缺少一个名为 <code class="docutils literal notranslate"><span class="pre">start</span></code> 的语义项。
-之前提到标准库和三方库作为应用程序的执行环境，负责在执行应用程序之前进行一些初始化工作，然后才跳转到应用程序的入口 <code class="docutils literal notranslate"><span class="pre">main</span></code> 函数开始执行。
 <code class="docutils literal notranslate"><span class="pre">start</span></code> 语义项代表了标准库 std 在执行应用程序之前需要进行的一些初始化工作。由于我们禁用了标准库，编译器也就找不到这项功能的实现了。</p>
 <p>在 <code class="docutils literal notranslate"><span class="pre">main.rs</span></code> 的开头加入设置 <code class="docutils literal notranslate"><span class="pre">#![no_main]</span></code> 告诉编译器我们没有一般意义上的 <code class="docutils literal notranslate"><span class="pre">main</span></code> 函数，
 并将原来的 <code class="docutils literal notranslate"><span class="pre">main</span></code> 函数删除。这样编译器也就不需要考虑初始化工作了。</p>
@@ -350,8 +349,8 @@ error: requires `start` lang_item
 <p>通过 <code class="docutils literal notranslate"><span class="pre">file</span></code> 工具对二进制程序 <code class="docutils literal notranslate"><span class="pre">os</span></code> 的分析可以看到，它好像是一个合法的 RV64 执行程序，
 但 <code class="docutils literal notranslate"><span class="pre">rust-readobj</span></code> 工具告诉我们它的入口地址 Entry 是 <code class="docutils literal notranslate"><span class="pre">0</span></code>。
 再通过 <code class="docutils literal notranslate"><span class="pre">rust-objdump</span></code> 工具把它反汇编，没有生成任何汇编代码。
-可见，这个二进制程序虽然合法，但它是一个空程序，原因是缺少了编译器需要找到的入口函数 <code class="docutils literal notranslate"><span class="pre">_start</span></code> 。</p>
-<p>从下一节开始，我们将着手实现本节移除的，由用户态执行环境提供的功能。</p>
+可见，这个二进制程序虽然合法，但它是一个空程序，原因是缺少了编译器规定的入口函数 <code class="docutils literal notranslate"><span class="pre">_start</span></code> 。</p>
+<p>从下一节开始，我们将着手实现本节移除的、由用户态执行环境提供的功能。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>本节内容部分参考自 <a class="reference external" href="https://os.phil-opp.com/freestanding-rust-binary/">BlogOS 的相关章节</a> 。</p>

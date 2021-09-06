@@ -306,16 +306,16 @@ RustSBI提供的SBI调用的指令也是 <code class="docutils literal notransla
 RustSBI位于机器特权级（Machine Mode）。
 下一章会进一步阐释具体细节。</p>
 <p>编译执行，结果如下：</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span>编译生成ELF格式的执行文件
-<span class="gp">$ </span>cargo build --release
-<span class="go"> Compiling os v0.1.0 (/media/chyyuu/ca8c7ba6-51b7-41fc-8430-e29e31e5328f/thecode/rust/os_kernel_lab/os)</span>
-<span class="go">  Finished release [optimized] target(s) in 0.15s</span>
-<span class="gp"># </span>把ELF执行文件转成bianary文件
-<span class="gp">$ </span>rust-objcopy --binary-architecture<span class="o">=</span>riscv64 target/riscv64gc-unknown-none-elf/release/os --strip-all -O binary target/riscv64gc-unknown-none-elf/release/os.bin
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 编译生成ELF格式的执行文件</span>
+$ cargo build --release
+ Compiling os v0.1.0 <span class="o">(</span>/media/chyyuu/ca8c7ba6-51b7-41fc-8430-e29e31e5328f/thecode/rust/os_kernel_lab/os<span class="o">)</span>
+  Finished release <span class="o">[</span>optimized<span class="o">]</span> target<span class="o">(</span>s<span class="o">)</span> <span class="k">in</span> <span class="m">0</span>.15s
+<span class="c1"># 把ELF执行文件转成bianary文件</span>
+$ rust-objcopy --binary-architecture<span class="o">=</span>riscv64 target/riscv64gc-unknown-none-elf/release/os --strip-all -O binary target/riscv64gc-unknown-none-elf/release/os.bin
 
-<span class="gp"># </span>加载运行
-<span class="gp">$ </span>qemu-system-riscv64 -machine virt -nographic -bios ../bootloader/rustsbi-qemu.bin -device loader,file<span class="o">=</span>target/riscv64gc-unknown-none-elf/release/os.bin,addr<span class="o">=</span>0x80200000
-<span class="gp"># </span>无法退出，风扇狂转，感觉碰到死循环
+<span class="c1"># 加载运行</span>
+$ qemu-system-riscv64 -machine virt -nographic -bios ../bootloader/rustsbi-qemu.bin -device loader,file<span class="o">=</span>target/riscv64gc-unknown-none-elf/release/os.bin,addr<span class="o">=</span>0x80200000
+<span class="c1"># 无法退出，风扇狂转，感觉碰到死循环</span>
 </pre></div>
 </div>
 <p>问题在哪？通过 rust-readobj 分析 <code class="docutils literal notranslate"><span class="pre">os</span></code> 可执行程序，发现其入口地址不是
