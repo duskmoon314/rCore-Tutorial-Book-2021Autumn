@@ -134,15 +134,14 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">第四章：地址空间</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">实现 SV39 多级页表机制（上）</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">本节导读</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">虚拟地址和物理地址</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">虚拟地址和物理地址</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#csr">内存控制相关的CSR寄存器</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">地址格式与组成</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">地址相关的数据结构抽象与类型定义</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">地址格式与组成</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">地址相关的数据结构抽象与类型定义</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">页表项的数据结构抽象与类型定义</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">多级页表原理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">页表项的数据结构抽象与类型定义</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">多级页表原理</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="4sv39-implementation-2.html">实现 SV39 多级页表机制（下）</a></li>
@@ -239,15 +238,12 @@ commentsRunWhenDOMLoaded(addUtterances);
 <h1>实现 SV39 多级页表机制（上）<a class="headerlink" href="#sv39" title="永久链接至标题">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>扩展阅读： <a class="reference external" href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/chapter4/1rust-dynamic-allocation.html">Rust 中的动态内存分配</a></p>
-<p>扩展阅读： <a class="reference external" href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/chapter4/2address-space.html">地址空间</a></p>
+<p>背景知识： <a class="reference external" href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/chapter4/1rust-dynamic-allocation.html">Rust 中的动态内存分配</a></p>
+<p>背景知识： <a class="reference external" href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/chapter4/2address-space.html">地址空间</a></p>
 </div>
+<p>我们将在内核实现 RV64 架构 SV39 分页机制。由于内容过多，分成两个小节。</p>
 <div class="section" id="id2">
-<h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>在上一小节中我们已经简单介绍了分页的内存管理策略，现在我们尝试在 RV64 架构提供的 SV39 分页机制的基础上完成内核中的软件对应实现。由于内容过多，我们将分成两个小节进行讲解。本节主要讲解在RV64架构下的虚拟地址与物理地址的访问属性（可读，可写，可执行等），组成结构（页号，帧号，偏移量等），访问的空间范围等；以及如何用Rust语言来设计有类型的页表项。</p>
-</div>
-<div class="section" id="id3">
-<h2>虚拟地址和物理地址<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>虚拟地址和物理地址<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <div class="section" id="csr">
 <h3>内存控制相关的CSR寄存器<a class="headerlink" href="#csr" title="永久链接至标题">¶</a></h3>
 <p>默认情况下 MMU 未被使能，此时无论 CPU 位于哪个特权级，访存的地址都会作为一个物理地址交给对应的内存控制单元来直接
@@ -266,8 +262,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 虚拟地址还是物理地址，真正有意义、能够通过 MMU 的地址转换或是 CPU 内存控制单元的检查的地址仅占其中的很小
 一部分，因此它们的理论容量上限在目前都没有实际意义。</p>
 </div>
-<div class="section" id="id4">
-<h3>地址格式与组成<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id3">
+<h3>地址格式与组成<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <img alt="../_images/sv39-va-pa.png" src="../_images/sv39-va-pa.png" />
 <p id="term-page-offset">我们采用分页管理，单个页面的大小设置为 <span class="math notranslate nohighlight">\(4\text{KiB}\)</span> ，每个虚拟页面和物理页帧都对齐到这个页面大小，也就是说
 虚拟/物理地址区间 <span class="math notranslate nohighlight">\([0,4\text{KiB})\)</span> 为第 <span class="math notranslate nohighlight">\(0\)</span> 个虚拟页面/物理页帧，而
@@ -290,8 +286,8 @@ SV39 分页模式规定 64 位虚拟地址的 <span class="math notranslate nohi
 我们专注于介绍 MMU 的机制，强调 MMU 看到的真正用来地址转换的虚拟地址只有 39 位。</p>
 </div>
 </div>
-<div class="section" id="id5">
-<h3>地址相关的数据结构抽象与类型定义<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id4">
+<h3>地址相关的数据结构抽象与类型定义<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <p>正如本章第一小节所说，在分页内存管理中，地址转换的核心任务在于如何维护虚拟页号到物理页号的映射——也就是页表。不过在具体
 实现它之前，我们先将地址和页号的概念抽象为 Rust 中的类型，借助 Rust 的类型安全特性来确保它们被正确实现。</p>
 <p>首先是这些类型的定义：</p>
@@ -382,8 +378,8 @@ usize 的一种简单包装。我们刻意将它们各自抽象出来而不是�
 <p>我们暂时先介绍这两种最简单的类型转换。</p>
 </div>
 </div>
-<div class="section" id="id6">
-<h2>页表项的数据结构抽象与类型定义<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id5">
+<h2>页表项的数据结构抽象与类型定义<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>第一小节中我们提到，在页表中以虚拟页号作为索引不仅能够查到物理页号，还能查到一组保护位，它控制了应用对地址空间每个
 虚拟页面的访问权限。但实际上还有更多的标志位，物理页号和全部的标志位以某种固定的格式保存在一个结构体中，它被称为
 <strong>页表项</strong> (PTE, Page Table Entry) ，是利用虚拟页号在页表中查到的结果。</p>
@@ -483,8 +479,8 @@ usize 的一种简单包装。我们刻意将它们各自抽象出来而不是�
 </div>
 <p>这里相当于判断两个集合的交集是否为空集，部分说明了 <code class="docutils literal notranslate"><span class="pre">bitflags</span></code> crate 的使用方法。</p>
 </div>
-<div class="section" id="id7">
-<h2>多级页表原理<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id6">
+<h2>多级页表原理<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>页表的一种最简单的实现是线性表，也就是按照地址从低到高、输入的虚拟页号从 <span class="math notranslate nohighlight">\(0\)</span> 开始递增的顺序依次在内存中
 （我们之前提到过页表的容量过大无法保存在 CPU 中）放置每个虚拟页号对应的页表项。由于每个页表项的大小是 <span class="math notranslate nohighlight">\(8\)</span>
 字节，我们只要知道第一个页表项（对应虚拟页号 <span class="math notranslate nohighlight">\(0\)</span> ）被放在的物理地址 <span class="math notranslate nohighlight">\(\text{base_addr}\)</span> ，就能

@@ -133,7 +133,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1"><a class="reference internal" href="../chapter4/index.html">第四章：地址空间</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">第五章：进程及进程管理</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1process.html">进程概念及重要系统调用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1process.html">与进程有关的重要系统调用</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2core-data-structures.html">进程管理的核心数据结构</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">进程管理机制的设计实现</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">本节导读</a></li>
@@ -242,27 +242,24 @@ commentsRunWhenDOMLoaded(addUtterances);
 <h1>进程管理机制的设计实现<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id2">
 <h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>本节将从如下四个方面介绍如何基于上一节设计的内核数据结构来实现进程管理：</p>
+<p>本节将介绍如何基于上一节设计的内核数据结构来实现进程管理：</p>
 <ul class="simple">
 <li><p>初始进程 <code class="docutils literal notranslate"><span class="pre">initproc</span></code> 的创建；</p></li>
-<li><p>进程调度机制：当进程主动调用 <code class="docutils literal notranslate"><span class="pre">sys_yield</span></code> 交出 CPU 使用权或者内核本轮分配的时间片用尽之后如何切换到下一个进程；</p></li>
+<li><p>进程调度机制：当进程主动调用 <code class="docutils literal notranslate"><span class="pre">sys_yield</span></code> 交出 CPU 使用权，或者内核本轮分配的时间片用尽之后如何切换到下一个进程；</p></li>
 <li><p>进程生成机制：介绍进程相关的两个重要系统调用 <code class="docutils literal notranslate"><span class="pre">sys_fork/sys_exec</span></code> 的实现；</p></li>
-<li><p>字符输入机制：为了支对shell程序-user_shell获得字符输入，介绍 <code class="docutils literal notranslate"><span class="pre">sys_read</span></code> 系统调用的实现；</p></li>
-<li><p>进程资源回收机制：当进程调用 <code class="docutils literal notranslate"><span class="pre">sys_exit</span></code> 正常退出或者出错被内核终止之后如何保存其退出码，其父进程又是如何通过 <code class="docutils literal notranslate"><span class="pre">sys_waitpid</span></code> 系统调用收集该进程的信息并回收其资源。</p></li>
+<li><p>字符输入机制：介绍 <code class="docutils literal notranslate"><span class="pre">sys_read</span></code> 系统调用的实现；</p></li>
+<li><p>进程资源回收机制：当进程调用 <code class="docutils literal notranslate"><span class="pre">sys_exit</span></code> 正常退出或者出错被内核终止后，如何保存其退出码，其父进程又是如何通过 <code class="docutils literal notranslate"><span class="pre">sys_waitpid</span></code> 收集该进程的信息并回收其资源。</p></li>
 </ul>
 </div>
 <div class="section" id="id3">
 <h2>初始进程的创建<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<p>内核初始化完毕之后即会调用 <code class="docutils literal notranslate"><span class="pre">task</span></code> 子模块提供的 <code class="docutils literal notranslate"><span class="pre">add_initproc</span></code> 函数来将初始进程 <code class="docutils literal notranslate"><span class="pre">initproc</span></code> 加入任务管理器，但在这之前我们需要初始化初始进程的进程控制块 <code class="docutils literal notranslate"><span class="pre">INITPROC</span></code> ，这个过程基于 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 在运行时完成。</p>
+<p>内核初始化完毕之后，即会调用 <code class="docutils literal notranslate"><span class="pre">task</span></code> 子模块提供的 <code class="docutils literal notranslate"><span class="pre">add_initproc</span></code> 函数来将初始进程 <code class="docutils literal notranslate"><span class="pre">initproc</span></code> 加入任务管理器，但在这之前，我们需要初始化初始进程的进程控制块 <code class="docutils literal notranslate"><span class="pre">INITPROC</span></code> ，这个过程基于 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 在运行时完成。</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/task/mod.rs</span>
 
-<span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">loader</span>::<span class="n">get_app_data_by_name</span><span class="p">;</span><span class="w"></span>
-<span class="k">use</span><span class="w"> </span><span class="n">manager</span>::<span class="n">add_task</span><span class="p">;</span><span class="w"></span>
-
 <span class="n">lazy_static</span><span class="o">!</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">ref</span><span class="w"> </span><span class="n">INITPROC</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="w"></span>
-<span class="w">        </span><span class="n">TaskControlBlock</span>::<span class="n">new</span><span class="p">(</span><span class="n">get_app_data_by_name</span><span class="p">(</span><span class="s">&quot;initproc&quot;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span><span class="w"></span>
-<span class="w">    </span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">ref</span><span class="w"> </span><span class="n">INITPROC</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">TaskControlBlock</span>::<span class="n">new</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="n">get_app_data_by_name</span><span class="p">(</span><span class="s">&quot;initproc&quot;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">));</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 
 <span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">add_initproc</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -270,7 +267,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>我们调用 <code class="docutils literal notranslate"><span class="pre">TaskControlBlock::new</span></code> 来创建一个进程控制块，它需要传入 ELF 可执行文件的数据切片作为参数，这可以通过加载器 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 子模块提供的 <code class="docutils literal notranslate"><span class="pre">get_app_data_by_name</span></code> 接口查找 <code class="docutils literal notranslate"><span class="pre">initproc</span></code> 的 ELF 数据来获得。在初始化 <code class="docutils literal notranslate"><span class="pre">INITPROC</span></code> 之后，则在 <code class="docutils literal notranslate"><span class="pre">add_initproc</span></code> 中可以调用 <code class="docutils literal notranslate"><span class="pre">task</span></code> 的任务管理器 <code class="docutils literal notranslate"><span class="pre">manager</span></code> 子模块提供的 <code class="docutils literal notranslate"><span class="pre">add_task</span></code> 接口将其加入到任务管理器。</p>
+<p>我们调用 <code class="docutils literal notranslate"><span class="pre">TaskControlBlock::new</span></code> 来创建一个进程控制块，它需要传入 ELF 可执行文件的数据切片作为参数，
+这可以通过加载器 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 子模块提供的 <code class="docutils literal notranslate"><span class="pre">get_app_data_by_name</span></code> 接口查找 <code class="docutils literal notranslate"><span class="pre">initproc</span></code> 的 ELF 数据来获得。在初始化 <code class="docutils literal notranslate"><span class="pre">INITPROC</span></code> 之后，则在 <code class="docutils literal notranslate"><span class="pre">add_initproc</span></code> 中可以调用 <code class="docutils literal notranslate"><span class="pre">task</span></code> 的任务管理器 <code class="docutils literal notranslate"><span class="pre">manager</span></code> 子模块提供的 <code class="docutils literal notranslate"><span class="pre">add_task</span></code> 接口将其加入到任务管理器。</p>
 <p>接下来介绍 <code class="docutils literal notranslate"><span class="pre">TaskControlBlock::new</span></code> 是如何实现的：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// os/src/task/task.rs</span>
 <span class="linenos"> 2</span>
@@ -296,38 +294,38 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">22</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">task_control_block</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="linenos">23</span><span class="w">        </span><span class="n">pid</span>: <span class="nc">pid_handle</span><span class="p">,</span><span class="w"></span>
 <span class="linenos">24</span><span class="w">        </span><span class="n">kernel_stack</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">25</span><span class="w">        </span><span class="n">inner</span>: <span class="nc">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="n">TaskControlBlockInner</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">26</span><span class="w">            </span><span class="n">trap_cx_ppn</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">27</span><span class="w">            </span><span class="n">base_size</span>: <span class="nc">user_sp</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">28</span><span class="w">            </span><span class="n">task_cx_ptr</span>: <span class="nc">task_cx_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">29</span><span class="w">            </span><span class="n">task_status</span>: <span class="nc">TaskStatus</span>::<span class="n">Ready</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">30</span><span class="w">            </span><span class="n">memory_set</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">31</span><span class="w">            </span><span class="n">parent</span>: <span class="nb">None</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">32</span><span class="w">            </span><span class="n">children</span>: <span class="nb">Vec</span>::<span class="n">new</span><span class="p">(),</span><span class="w"></span>
-<span class="linenos">33</span><span class="w">            </span><span class="n">exit_code</span>: <span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">34</span><span class="w">        </span><span class="p">}),</span><span class="w"></span>
-<span class="linenos">35</span><span class="w">    </span><span class="p">};</span><span class="w"></span>
-<span class="linenos">36</span><span class="w">    </span><span class="c1">// prepare TrapContext in user space</span>
-<span class="linenos">37</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">task_control_block</span><span class="p">.</span><span class="n">acquire_inner_lock</span><span class="p">().</span><span class="n">get_trap_cx</span><span class="p">();</span><span class="w"></span>
-<span class="linenos">38</span><span class="w">    </span><span class="o">*</span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TrapContext</span>::<span class="n">app_init_context</span><span class="p">(</span><span class="w"></span>
-<span class="linenos">39</span><span class="w">        </span><span class="n">entry_point</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">40</span><span class="w">        </span><span class="n">user_sp</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">41</span><span class="w">        </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">token</span><span class="p">(),</span><span class="w"></span>
-<span class="linenos">42</span><span class="w">        </span><span class="n">kernel_stack_top</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">43</span><span class="w">        </span><span class="n">trap_handler</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">44</span><span class="w">    </span><span class="p">);</span><span class="w"></span>
-<span class="linenos">45</span><span class="w">    </span><span class="n">task_control_block</span><span class="w"></span>
-<span class="linenos">46</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">        </span><span class="n">inner</span>: <span class="nc">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">UPSafeCell</span>::<span class="n">new</span><span class="p">(</span><span class="n">TaskControlBlockInner</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">                </span><span class="n">trap_cx_ppn</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">27</span><span class="w">                </span><span class="n">base_size</span>: <span class="nc">user_sp</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">28</span><span class="w">                </span><span class="n">task_cx</span>: <span class="nc">TaskContext</span>::<span class="n">goto_trap_return</span><span class="p">(</span><span class="n">kernel_stack_top</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">                </span><span class="n">task_status</span>: <span class="nc">TaskStatus</span>::<span class="n">Ready</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">30</span><span class="w">                </span><span class="n">memory_set</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">31</span><span class="w">                </span><span class="n">parent</span>: <span class="nb">None</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">                </span><span class="n">children</span>: <span class="nb">Vec</span>::<span class="n">new</span><span class="p">(),</span><span class="w"></span>
+<span class="linenos">33</span><span class="w">                </span><span class="n">exit_code</span>: <span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">34</span><span class="w">            </span><span class="p">})</span><span class="w"></span>
+<span class="linenos">35</span><span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="linenos">36</span><span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="linenos">37</span><span class="w">    </span><span class="c1">// prepare TrapContext in user space</span>
+<span class="linenos">38</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">task_control_block</span><span class="p">.</span><span class="n">inner_exclusive_access</span><span class="p">().</span><span class="n">get_trap_cx</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">39</span><span class="w">    </span><span class="o">*</span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TrapContext</span>::<span class="n">app_init_context</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">40</span><span class="w">        </span><span class="n">entry_point</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">41</span><span class="w">        </span><span class="n">user_sp</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">42</span><span class="w">        </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">exclusive_access</span><span class="p">().</span><span class="n">token</span><span class="p">(),</span><span class="w"></span>
+<span class="linenos">43</span><span class="w">        </span><span class="n">kernel_stack_top</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">44</span><span class="w">        </span><span class="n">trap_handler</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">45</span><span class="w">    </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">46</span><span class="w">    </span><span class="n">task_control_block</span><span class="w"></span>
+<span class="linenos">47</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>第 10 行我们解析 ELF 得到应用地址空间 <code class="docutils literal notranslate"><span class="pre">memory_set</span></code> ，用户栈在应用地址空间中的位置 <code class="docutils literal notranslate"><span class="pre">user_sp</span></code> 以及应用的入口点 <code class="docutils literal notranslate"><span class="pre">entry_point</span></code> 。</p></li>
-<li><p>第 11 行我们手动查页表找到应用地址空间中的 Trap 上下文被实际放在哪个物理页帧上，用来做后续的初始化。</p></li>
-<li><p>第 16~18 行我们为该进程分配 PID 以及内核栈，并记录下内核栈在内核地址空间的位置 <code class="docutils literal notranslate"><span class="pre">kernel_stack_top</span></code> 。</p></li>
-<li><p>第 20 行我们在该进程的内核栈上压入初始化的任务上下文，使得第一次任务切换到它的时候可以跳转到 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 并进入用户态开始执行。</p></li>
-<li><p>第 21 行我们整合之前的部分信息创建进程控制块 <code class="docutils literal notranslate"><span class="pre">task_control_block</span></code> 。</p></li>
-<li><p>第 39 行我们初始化位于该进程应用地址空间中的 Trap 上下文，使得第一次进入用户态的时候时候能正确跳转到应用入口点并设置好用户栈，同时也保证在 Trap 的时候用户态能正确进入内核态。</p></li>
-<li><p>第 46 行将 <code class="docutils literal notranslate"><span class="pre">task_control_block</span></code> 返回。</p></li>
+<li><p>第 10 行，解析 ELF 得到应用地址空间 <code class="docutils literal notranslate"><span class="pre">memory_set</span></code> ，用户栈在应用地址空间中的位置 <code class="docutils literal notranslate"><span class="pre">user_sp</span></code> 以及应用的入口点 <code class="docutils literal notranslate"><span class="pre">entry_point</span></code> 。</p></li>
+<li><p>第 11 行，手动查页表找到应用地址空间中的 Trap 上下文实际所在的物理页帧。</p></li>
+<li><p>第 16~18 行，为新进程分配 PID 以及内核栈，并记录下内核栈在内核地址空间的位置 <code class="docutils literal notranslate"><span class="pre">kernel_stack_top</span></code> 。</p></li>
+<li><p>第 20 行，在该进程的内核栈上压入初始化的任务上下文，使得第一次任务切换到它的时候可以跳转到 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 并进入用户态开始执行。</p></li>
+<li><p>第 21 行，整合之前的部分信息创建进程控制块 <code class="docutils literal notranslate"><span class="pre">task_control_block</span></code> 。</p></li>
+<li><p>第 39 行，初始化位于该进程应用地址空间中的 Trap 上下文，使得第一次进入用户态时，能正确跳转到应用入口点并设置好用户栈，同时也保证在 Trap 的时候用户态能正确进入内核态。</p></li>
 </ul>
 </div>
 <div class="section" id="id4">
