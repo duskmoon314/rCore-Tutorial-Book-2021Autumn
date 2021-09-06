@@ -322,7 +322,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 被回收时减少。当这个计数变为零之后，这个计数变量本身以及被引用的变量都会从堆上被回收。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 是一个互斥锁，在多线程中使用，它可以保护里层被动态分配到堆上的变量同一时间只有一个线程能对它
 进行操作，从而避免数据竞争，这是并发安全的问题，会在后面详细说明。同时，它能够提供
-<a class="reference internal" href="../chapter2/3batch-system.html#term-interior-mutability"><span class="std std-ref">内部可变性</span></a> 。<code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 时常和 <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code> 配套使用，因为它是用来
+<span class="xref std std-ref">内部可变性</span> 。<code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 时常和 <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code> 配套使用，因为它是用来
 保护多个线程可能同时访问的数据，其前提就是多个线程都拿到指向同一块堆上数据的 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 。于是，要么就是
 这个 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 作为全局变量被分配到数据段上，要么就是我们需要将 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 包裹上一层多所有权变成
 <code class="docutils literal notranslate"><span class="pre">Arc&lt;Mutex&lt;T&gt;&gt;</span></code> ，让它可以在线程间进行传递。请记住 <code class="docutils literal notranslate"><span class="pre">Arc&lt;Mutex&lt;T&gt;&gt;</span></code> 这个经典组合，我们后面会经常用到。</p>

@@ -393,7 +393,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 加锁的原因其实有两点：</p>
 <ol class="arabic">
 <li><p>在不触及 <code class="docutils literal notranslate"><span class="pre">unsafe</span></code> 的情况下实现 <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">mut</span></code> 语义。如果读者还有印象，
-<a class="reference internal" href="../chapter2/3batch-system.html#term-interior-mutability"><span class="std std-ref">前面章节</span></a> 我们使用 <code class="docutils literal notranslate"><span class="pre">RefCell&lt;T&gt;</span></code> 提供了内部可变性去掉了
+<span class="xref std std-ref">前面章节</span> 我们使用 <code class="docutils literal notranslate"><span class="pre">RefCell&lt;T&gt;</span></code> 提供了内部可变性去掉了
 声明中的 <code class="docutils literal notranslate"><span class="pre">mut</span></code> ，然而麻烦的在于 <code class="docutils literal notranslate"><span class="pre">static</span></code> ，在 Rust 中一个类型想被实例化为一个全局变量，则
 该类型必须先告知编译器自己某种意义上是线程安全的，这个过程本身是 <code class="docutils literal notranslate"><span class="pre">unsafe</span></code> 的。</p>
 <p>因此我们直接使用 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> ，它既通过 <code class="docutils literal notranslate"><span class="pre">lock</span></code> 方法提供了内部可变性，又已经在模块内部告知了

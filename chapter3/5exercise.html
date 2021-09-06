@@ -146,7 +146,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">简答作业</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id7">报告要求</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">参考信息</a></li>
 </ul>
 </li>
 </ul>
@@ -275,7 +274,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p>另外需要注意的是，在修改之后， <code class="docutils literal notranslate"><span class="pre">sys_gettime</span></code> 和 POSIX 标准接口也仅仅做到了格式相同。在 POSIX 标准接口中 <code class="docutils literal notranslate"><span class="pre">sys_gettime</span></code> 统计当前相对 1970-01-01 00:00:00 +0000 (UTC) 过去的时间，而我们并没有用到任何 RTC 外设，只能做到统计自开机之后过去的时间。</p>
 </div>
 <p>需要说明的是 lab3 有3类测例，<code class="docutils literal notranslate"><span class="pre">ch3_0_*</span></code> 用来检查基本 syscall 的实现，<code class="docutils literal notranslate"><span class="pre">ch3_1_*</span></code> 基于 yield 来检测基本的调度，<code class="docutils literal notranslate"><span class="pre">ch3_2_*</span></code> 基于时钟中断来测试 stride 调度算法实现的正确性。测试时可以分别测试 3 组测例，使得输出更加可控、更加清晰。</p>
-<p>challenge: 实现多核，可以并行调度。</p>
 </div>
 <div class="section" id="id3">
 <h3>实验约定<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
@@ -310,8 +308,8 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p>(2-1) 在目前这一章（chapter3）两种调度策略有实质不同吗？考虑在一个完整的 os 中，随时可能有新进程产生，这两种策略是否实质相同？</p>
 <p>(2-2) 其实 C 版调度策略在公平性上存在比较大的问题，请找到一个进程产生和结束的时间序列，使得在该调度算法下发生：先创建的进程后执行的现象。你需要给出类似下面例子的信息（有更详细的分析描述更好，但尽量精简）。同时指出该序列在你实现的 stride 调度算法下顺序是怎样的？</p>
 <blockquote>
-<div><table class="docutils align-center" id="id11">
-<caption><span class="caption-text">调度顺序举例</span><a class="headerlink" href="#id11" title="永久链接至表格">¶</a></caption>
+<div><table class="docutils align-center" id="id8">
+<caption><span class="caption-text">调度顺序举例</span><a class="headerlink" href="#id8" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 11%" />
 <col style="width: 11%" />
@@ -406,23 +404,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li><p>简单总结与上次实验相比本次实验你增加的东西（控制在5行以内，不要贴代码）。</p></li>
 <li><p>完成问答问题。</p></li>
 <li><p>(optional) 你对本次实验设计及难度/工作量的看法，以及有哪些需要改进的地方，欢迎畅所欲言。</p></li>
-</ul>
-</div>
-<div class="section" id="id8">
-<h2>参考信息<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
-<p>如果有兴趣进一步了解 stride 调度相关内容，可以尝试看看：</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://people.cs.umass.edu/~mcorner/courses/691J/papers/PS/waldspurger_stride/waldspurger95stride.pdf">作者 Carl A. Waldspurger 写这个调度算法的原论文</a></p></li>
-<li><p><a class="reference external" href="http://www.waldspurger.org/carl/papers/phd-mit-slides.pdf">作者 Carl A. Waldspurger 的博士生答辩slide</a></p></li>
-<li><p><a class="reference external" href="https://nankai.gitbook.io/ucore-os-on-risc-v64/lab6/tiao-du-suan-fa-kuang-jia#stride-suan-fa">南开大学实验指导中对Stride算法的部分介绍</a></p></li>
-<li><p><a class="reference external" href="https://cs.nyu.edu/~rgrimm/teaching/sp08-os/stride.pdf">NYU OS课关于Stride Scheduling的Slide</a></p></li>
-</ul>
-<p>如果有兴趣进一步了解用户态线程实现的相关内容，可以尝试看看：</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/chyyuu/os_kernel_lab/tree/v4-user-std-multitask">user-multitask in rv64</a></p></li>
-<li><p><a class="reference external" href="https://github.com/cfsamson/example-greenthreads">绿色线程 in x86</a></p></li>
-<li><p><a class="reference external" href="https://cfsamson.gitbook.io/green-threads-explained-in-200-lines-of-rust/">x86版绿色线程的设计实现</a></p></li>
-<li><p><a class="reference external" href="https://blog.csdn.net/qq_31601743/article/details/97514081?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.control&amp;dist_request_id=&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.control">用户级多线程的切换原理</a></p></li>
 </ul>
 </div>
 </div>

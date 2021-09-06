@@ -130,7 +130,6 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li class="toctree-l1"><a class="reference internal" href="../chapter1/index.html">第一章：应用程序与基本执行环境</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">第二章：批处理系统</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1rv-privilege.html">特权级机制</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2application.html">实现应用程序</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3batch-system.html">实现批处理操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4trap-handling.html">实现特权级的切换</a></li>
@@ -226,51 +225,37 @@ commentsRunWhenDOMLoaded(addUtterances);
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="0intro.html">引言</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="0intro.html#id2">本章导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id4">实践体验</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id5">本章代码树</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0intro.html#id6">本章代码导读</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="1rv-privilege.html">特权级机制</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="1rv-privilege.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1rv-privilege.html#id3">特权级的软硬件协同设计</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1rv-privilege.html#risc-v">RISC-V 特权级架构</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="1rv-privilege.html#term-csr-instr">RISC-V的特权指令</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="0intro.html#id3">实践体验</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0intro.html#id4">本章代码树</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="2application.html">实现应用程序</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="2application.html#id2">本节导读</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2application.html#id3">应用程序设计</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="2application.html#id8">项目结构</a></li>
-<li class="toctree-l3"><a class="reference internal" href="2application.html#term-app-mem-layout">内存布局</a></li>
-<li class="toctree-l3"><a class="reference internal" href="2application.html#term-call-syscall">系统调用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="2application.html#id9">内存布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="2application.html#id10">系统调用</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="2application.html#id11">编译生成应用程序二进制码</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2application.html#id12">实现操作系统前执行应用程序</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="3batch-system.html">实现批处理操作系统</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="3batch-system.html#id2">本节导读</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3batch-system.html#id3">将应用程序链接到内核</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3batch-system.html#id4">找到并加载应用程序二进制码</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3batch-system.html#id2">将应用程序链接到内核</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3batch-system.html#id3">找到并加载应用程序二进制码</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="4trap-handling.html">实现特权级的切换</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#id2">本节导读</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#risc-v">RISC-V特权级切换</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id3">特权级切换的起因</a></li>
-<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id4">特权级切换相关的控制状态寄存器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id5">特权级切换</a></li>
+<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id2">特权级切换的起因</a></li>
+<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id3">特权级切换相关的控制状态寄存器</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#trap-hw-mechanism">特权级切换的硬件控制机制</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#id7">用户栈与内核栈</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#id5">用户栈与内核栈</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#trap">Trap 管理</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id8">Trap 上下文的保存与恢复</a></li>
-<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id9">Trap 分发与处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id6">Trap 上下文的保存与恢复</a></li>
+<li class="toctree-l3"><a class="reference internal" href="4trap-handling.html#id7">Trap 分发与处理</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="4trap-handling.html#ch2-app-execution">执行应用程序</a></li>

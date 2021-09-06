@@ -235,7 +235,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p>如果你在环境配置中遇到了无法解决的问题，请在本节讨论区留言，我们会尽力提供帮助。</p>
 <div class="section" id="os">
 <h2>OS 环境配置<a class="headerlink" href="#os" title="永久链接至标题">¶</a></h2>
-<p>目前，实验只支持 Ubuntu18.04/20.04 操作系统。使用 Windows10 和 macOS 的读者，可以安装一台 Ubuntu18.04 虚拟机或 Docker
+<p>目前，实验主要支持 Ubuntu18.04/20.04 操作系统。使用 Windows10 和 macOS 的读者，可以安装一台 Ubuntu18.04 虚拟机或 Docker
 进行实验。</p>
 <p>Windows10 用户可以通过系统内置的 <strong>WSL2</strong> 虚拟机（请不要使用 WSL1）来安装 Ubuntu 18.04 / 20.04 。
 步骤如下：</p>
@@ -275,6 +275,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <li><p>通过 <code class="docutils literal notranslate"><span class="pre">ls</span></code> 可以发现 <code class="docutils literal notranslate"><span class="pre">/mnt</span></code> 目录下的内容和 <code class="docutils literal notranslate"><span class="pre">rCore-Tutorial-v3</span></code> 目录下的内容完全相同，接下来就可以在这个环境下运行 tutorial 了。例如 <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">os</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">run</span></code> 。</p></li>
 </ol>
 </div>
+<p>使用 macOS 进行实验理论上也是可行的，但本章节仅介绍 Ubuntu 下的环境配置方案。</p>
 </div>
 <div class="section" id="rust">
 <h2>Rust 开发环境配置<a class="headerlink" href="#rust" title="永久链接至标题">¶</a></h2>
@@ -341,8 +342,7 @@ curl https://sh.rustup.rs -sSf <span class="p">|</span> sh
 </div>
 <div class="section" id="qemu">
 <h2>Qemu 模拟器安装<a class="headerlink" href="#qemu" title="永久链接至标题">¶</a></h2>
-<p>我们需要使用 Qemu 5.0.0 版本进行实验，而很多 Linux 发行版的软件包管理器默认软件源中的 Qemu 版本过低，因此
-我们需要从源码手动编译安装 Qemu 模拟器。</p>
+<p>我们需要使用 Qemu 5.0.0 版本进行实验，为此，从源码手动编译安装 Qemu 模拟器：</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 安装编译所需的依赖包</span>
 sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev <span class="se">\</span>
               gawk build-essential bison flex texinfo gperf libtool patchutils bc <span class="se">\</span>
