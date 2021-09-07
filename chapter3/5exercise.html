@@ -284,25 +284,61 @@
         </div>
         <div class="section" id="chapter3">
 <h1>chapter3练习<a class="headerlink" href="#chapter3" title="永久链接至标题">¶</a></h1>
+<div class="section" id="id1">
+<h2>编程作业<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id2">
+<h3>简单安全检查<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<p>lab2 中，我们实现了第一个系统调用 <code class="docutils literal notranslate"><span class="pre">sys_write</span></code>，这使得我们可以在用户态输出信息。但是 os 在提供服务的同时，还有保护 os 本身以及其他用户程序不受错误或者恶意程序破坏的功能。</p>
+<p>由于还没有实现虚拟内存，我们可以在用户程序中指定一个属于其他程序字符串，并将它输出，这显然是不合理的，因此我们要对 sys_write 做检查：</p>
+<ul class="simple">
+<li><p>sys_write 仅能输出位于程序本身内存空间内的数据，否则报错。</p></li>
+</ul>
+</div>
+<div class="section" id="stride">
+<h3>stride 调度算法<a class="headerlink" href="#stride" title="永久链接至标题">¶</a></h3>
+<p>lab3中我们引入了任务调度的概念，可以在不同任务之间切换，目前我们实现的调度算法十分简单，存在一些问题且不存在优先级。现在我们要为我们的 os 实现一种带优先级的调度算法：stide 调度算法。</p>
+<p>算法描述如下:</p>
+<ol class="arabic simple">
+<li><p>为每个进程设置一个当前 stride，表示该进程当前已经运行的“长度”。另外设置其对应的 pass 值（只与进程的优先权有关系），表示对应进程在调度后，stride 需要进行的累加值。</p></li>
+<li><p>每次需要调度时，从当前 runnable 态的进程中选择 stride 最小的进程调度。对于获得调度的进程 P，将对应的 stride 加上其对应的步长 pass。</p></li>
+<li><p>一个时间片后，回到上一步骤，重新调度当前 stride 最小的进程。</p></li>
+</ol>
+<p>可以证明，如果令 P.pass = BigStride / P.priority 其中 P.priority 表示进程的优先权（大于 1），而 BigStride 表示一个预先定义的大常数，则该调度方案为每个进程分配的时间将与其优先级成正比。证明过程我们在这里略去，有兴趣的同学可以在网上查找相关资料。</p>
+<p>其他实验细节：</p>
+<ul class="simple">
+<li><p>stride 调度要求进程优先级 <span class="math notranslate nohighlight">\(\geq 2\)</span>，所以设定进程优先级 <span class="math notranslate nohighlight">\(\leq 1\)</span> 会导致错误。</p></li>
+<li><p>进程初始 stride 设置为 0 即可。</p></li>
+<li><p>进程初始优先级设置为 16。</p></li>
+</ul>
+<p>tips: 可以使用优先级队列比较方便的实现 stride 算法，但是我们的实验不考察效率，所以手写一个简单粗暴的也完全没问题。</p>
+<p>TODO：说明 set_prio 系统调用</p>
+</div>
+<div class="section" id="id3">
+<h3>实验要求<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>完成分支: ch3。</p></li>
+<li><p>通过所有测例</p></li>
+</ul>
+<p>lab3 有 2 类测例，在 os 目录下执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=1</span></code> 检查基本 syscall 的实现，执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=2</span></code> 检查 stride 调度算法实现的正确性。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>为了让大家能在本编程作业中使用 <code class="docutils literal notranslate"><span class="pre">Vec</span></code> 等数据结构，我们利用第三方库 <code class="docutils literal notranslate"><span class="pre">buddy_system_allocator</span></code> 为大家实现了堆内存分配器，相关代码位于 <code class="docutils literal notranslate"><span class="pre">heap_alloc</span></code> 模块。</p>
 <p>背景知识： <a class="reference external" href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/chapter4/1rust-dynamic-allocation.html">Rust 中的动态内存分配</a></p>
 </div>
-<div class="section" id="id1">
-<h2>编程作业<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<div class="section" id="id2">
-<h3>实验要求<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
-</div>
-<div class="section" id="id3">
-<h3>实验检查<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<div class="admonition attention">
+<p class="admonition-title">注意</p>
+<p>你的实现只需且必须通过测例，建议读者感到困惑时先检查测例。</p>
 </div>
 </div>
 <div class="section" id="id4">
-<h2>简答作业<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h3>实验检查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+</div>
 </div>
 <div class="section" id="id5">
-<h2>报告要求<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<h2>简答作业<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="id6">
+<h2>报告要求<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>简单总结你实现的功能（200字以内，不要贴代码）。</p></li>
 <li><p>完成问答题。</p></li>
@@ -367,12 +403,14 @@
             <ul>
 <li><a class="reference internal" href="#">chapter3练习</a><ul>
 <li><a class="reference internal" href="#id1">编程作业</a><ul>
-<li><a class="reference internal" href="#id2">实验要求</a></li>
-<li><a class="reference internal" href="#id3">实验检查</a></li>
+<li><a class="reference internal" href="#id2">简单安全检查</a></li>
+<li><a class="reference internal" href="#stride">stride 调度算法</a></li>
+<li><a class="reference internal" href="#id3">实验要求</a></li>
+<li><a class="reference internal" href="#id4">实验检查</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id4">简答作业</a></li>
-<li><a class="reference internal" href="#id5">报告要求</a></li>
+<li><a class="reference internal" href="#id5">简答作业</a></li>
+<li><a class="reference internal" href="#id6">报告要求</a></li>
 </ul>
 </li>
 </ul>
@@ -424,5 +462,6 @@ var addUtterances = () => {
 commentsRunWhenDOMLoaded(addUtterances);
 </script>
     <script src="../_static/translations.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
