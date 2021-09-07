@@ -317,7 +317,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">40</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>可以看到，标准输入文件 <code class="docutils literal notranslate"><span class="pre">Stdin</span></code> 是只读文件，只允许进程通过 <code class="docutils literal notranslate"><span class="pre">read</span></code> 从里面读入，目前每次仅支持读入一个字符，其实现与之前的 <code class="docutils literal notranslate"><span class="pre">sys_read</span></code> 基本相同，只是需要通过 <code class="docutils literal notranslate"><span class="pre">UserBuffer</span></code> 来获取具体将字节写入的位置。相反，标准输出文件 <code class="docutils literal notranslate"><span class="pre">Stdout</span></code> 是只写文件，只允许进程通过 <code class="docutils literal notranslate"><span class="pre">write</span></code> 写入到里面，实现方法是遍历每个切片，将其转化为字符串通过 <code class="docutils literal notranslate"><span class="pre">print!</span></code> 宏来输出。值得注意的是，如果有多核同时使用 <code class="docutils literal notranslate"><span class="pre">print!</span></code> 宏，将会导致两个不同的输出交错到一起造成输出混乱，后续我们还会对它做一些改进。</p>
+<p>可以看到，标准输入文件 <code class="docutils literal notranslate"><span class="pre">Stdin</span></code> 是只读文件，只允许进程通过 <code class="docutils literal notranslate"><span class="pre">read</span></code> 从里面读入，目前每次仅支持读入一个字符，其实现与之前的 <code class="docutils literal notranslate"><span class="pre">sys_read</span></code> 基本相同，只是需要通过 <code class="docutils literal notranslate"><span class="pre">UserBuffer</span></code> 来获取具体将字节写入的位置。相反，标准输出文件 <code class="docutils literal notranslate"><span class="pre">Stdout</span></code> 是只写文件，只允许进程通过 <code class="docutils literal notranslate"><span class="pre">write</span></code> 写入到里面，实现方法是遍历每个切片，将其转化为字符串通过 <code class="docutils literal notranslate"><span class="pre">print!</span></code> 宏来输出。</p>
 </div>
 <div class="section" id="id4">
 <h2>文件描述符与文件描述符表<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
@@ -372,16 +372,16 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">15</span><span class="w">                    </span><span class="n">memory_set</span><span class="p">,</span><span class="w"></span>
 <span class="linenos">16</span><span class="w">                    </span><span class="n">parent</span>: <span class="nb">None</span><span class="p">,</span><span class="w"></span>
 <span class="linenos">17</span><span class="w">                    </span><span class="n">children</span>: <span class="nb">Vec</span>::<span class="n">new</span><span class="p">(),</span><span class="w"></span>
-<span class="hll"><span class="linenos">18</span><span class="w">                    </span><span class="n">exit_code</span>: <span class="mi">0</span><span class="p">,</span><span class="w"></span>
-</span><span class="hll"><span class="linenos">19</span><span class="w">                    </span><span class="n">fd_table</span>: <span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">                    </span><span class="n">exit_code</span>: <span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="hll"><span class="linenos">19</span><span class="w">                    </span><span class="n">fd_table</span>: <span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="w"></span>
 </span><span class="hll"><span class="linenos">20</span><span class="w">                        </span><span class="c1">// 0 -&gt; stdin</span>
 </span><span class="hll"><span class="linenos">21</span><span class="w">                        </span><span class="nb">Some</span><span class="p">(</span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Stdin</span><span class="p">)),</span><span class="w"></span>
 </span><span class="hll"><span class="linenos">22</span><span class="w">                        </span><span class="c1">// 1 -&gt; stdout</span>
 </span><span class="hll"><span class="linenos">23</span><span class="w">                        </span><span class="nb">Some</span><span class="p">(</span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Stdout</span><span class="p">)),</span><span class="w"></span>
 </span><span class="hll"><span class="linenos">24</span><span class="w">                        </span><span class="c1">// 2 -&gt; stderr</span>
 </span><span class="hll"><span class="linenos">25</span><span class="w">                        </span><span class="nb">Some</span><span class="p">(</span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Stdout</span><span class="p">)),</span><span class="w"></span>
-</span><span class="linenos">26</span><span class="w">                    </span><span class="p">],</span><span class="w"></span>
-<span class="linenos">27</span><span class="w">                </span><span class="p">})</span><span class="w"></span>
+</span><span class="hll"><span class="linenos">26</span><span class="w">                    </span><span class="p">],</span><span class="w"></span>
+</span><span class="linenos">27</span><span class="w">                </span><span class="p">})</span><span class="w"></span>
 <span class="linenos">28</span><span class="w">            </span><span class="p">},</span><span class="w"></span>
 <span class="linenos">29</span><span class="w">        </span><span class="p">};</span><span class="w"></span>
 <span class="linenos">30</span><span class="w">        </span><span class="o">..</span><span class="p">.</span><span class="w"></span>
