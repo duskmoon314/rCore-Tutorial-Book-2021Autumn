@@ -1,146 +1,228 @@
+<!doctype html>
+<html class="no-js" lang="zh_CN">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="文件系统接口" href="1fs-interface.html" /><link rel="prev" title="第七章：文件系统与I/O重定向" href="index.html" />
 
-
-<!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
-<head>
-  <meta charset="utf-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>引言 &mdash; rCore-Tutorial-Book-Autumn2021 0.1 文档</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_style.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
+    <meta name="generator" content="sphinx-4.1.2, furo 2021.08.31"/>
+        <title>引言 - rCore-Tutorial-Autumn2021 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=c7c65a82b42f6b978e58466c1e9ef2509836d916" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=16fb25fabf47304eee183a5e9af80b1ba98259b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/my_style.css" />
     
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script kind="utterances">
+    
 
-    var commentsRunWhenDOMLoaded = cb => {
-    if (document.readyState != 'loading') {
-        cb()
-    } else if (document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', cb)
-    } else {
-        document.attachEvent('onreadystatechange', function() {
-        if (document.readyState == 'complete') cb()
-        })
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
     }
-}
-
-var addUtterances = () => {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "https://utteranc.es/client.js";
-    script.async = "async";
-
-    script.setAttribute("repo", "rcore-os/rCore-Tutorial-Book-v3");
-    script.setAttribute("issue-term", "pathname");
-    script.setAttribute("theme", "github-light");
-    script.setAttribute("label", "comments");
-    script.setAttribute("crossorigin", "anonymous");
-
-    sections = document.querySelectorAll("div.section");
-    if (sections !== null) {
-        section = sections[sections.length-1];
-        section.appendChild(script);
-    }
-}
-commentsRunWhenDOMLoaded(addUtterances);
-</script>
-        <script src="../_static/translations.js"></script>
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
     
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
 
-    
-    <link rel="index" title="索引" href="../genindex.html" />
-    <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="文件系统接口" href="1fs-interface.html" />
-    <link rel="prev" title="第七章：文件系统与I/O重定向" href="index.html" /> 
-</head>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
 
-<body class="wy-body-for-nav">
 
-   
-  <div class="wy-grid-for-nav">
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-          
 
-          
-            <a href="../index.html" class="icon icon-home"> rCore-Tutorial-Book-Autumn2021
-          
-
-          
-          </a>
-
-          
-            
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="在文档中搜索" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption" role="heading"><span class="caption-text">正文</span></p>
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">rCore-Tutorial-Autumn2021  文档</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">rCore-Tutorial-Autumn2021  文档</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=搜索 name="q" aria-label="搜索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">正文</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../0setup-devel-env.html">第零章：实验环境配置</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter1/index.html">第一章：应用程序与基本执行环境</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter2/index.html">第二章：批处理系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter3/index.html">第三章：多道程序与分时多任务</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter4/index.html">第四章：地址空间</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter5/index.html">第五章：进程及进程管理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapter6/index.html">第六章：进程间通信</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">第七章：文件系统与I/O重定向</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">引言</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">本章导读</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">实践体验</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">本章代码树</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">本章代码导读</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../0setup-devel-env.html">第零章：实验环境配置</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter1/index.html">第一章：应用程序与基本执行环境</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter1/0intro.html">引言</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter1/1app-ee-platform.html">应用程序执行环境与平台支持</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter1/2remove-std.html">移除标准库依赖</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter1/3mini-rt-usrland.html">构建用户态执行环境</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter1/4mini-rt-baremetal.html">构建裸机执行环境</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter2/index.html">第二章：批处理系统</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter2/0intro.html">引言</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter2/2application.html">实现应用程序</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter2/3batch-system.html">实现批处理操作系统</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../chapter2/4trap-handling.html">实现特权级的切换</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter3/index.html">第三章：多道程序与分时多任务</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter3/0intro.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter3/1multi-loader.html">多道程序放置与加载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter3/2task-switching.html">任务切换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter3/3multiprogramming.html">管理多道程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter3/4time-sharing-system.html">分时多任务系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter3/5exercise.html">chapter3练习</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter4/index.html">第四章：地址空间</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter4/0intro.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter4/3sv39-implementation-1.html">实现 SV39 多级页表机制（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter4/4sv39-implementation-2.html">实现 SV39 多级页表机制（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter4/5kernel-app-spaces.html">内核与应用的地址空间</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter4/6multitasking-based-on-as.html">基于地址空间的分时多任务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter4/7exercise.html">chapter4练习</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter5/index.html">第五章：进程及进程管理</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter5/0intro.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter5/1process.html">与进程有关的重要系统调用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter5/2core-data-structures.html">进程管理的核心数据结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter5/3implement-process-mechanism.html">进程管理机制的设计实现</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../chapter6/index.html">第六章：进程间通信</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chapter6/0intro.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter6/1file-descriptor.html">基于文件的标准输入/输出</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter6/2pipe.html">管道</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chapter6/3exercise.html">chapter6练习</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">第七章：文件系统与I/O重定向</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">引言</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1fs-interface.html">文件系统接口</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2fs-implementation.html">简易文件系统 easy-fs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3using-easy-fs-in-kernel.html">在内核中使用 easy-fs</a></li>
@@ -151,127 +233,72 @@ commentsRunWhenDOMLoaded(addUtterances);
 </ul>
 <p class="caption" role="heading"><span class="caption-text">附录</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-a/index.html">附录 A：Rust 系统编程资料</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-b/index.html">附录 B：常见工具的使用方法</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix-d/1asm.html">RISCV汇编相关</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix-d/2rv.html">RISCV硬件相关</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">开发注记</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
 </ul>
 
-            
-          
-        </div>
-        
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">rCore-Tutorial-Book-Autumn2021</a>
-        
-      </nav>
-
-
-      <div class="wy-nav-content">
-        
-        <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
-  <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="index.html">第七章：文件系统与I/O重定向</a> &raquo;</li>
-        
-      <li>引言</li>
-    
-    
-      <li class="wy-breadcrumbs-aside">
-        
-          
-            <a href="../_sources/chapter7/0intro.rst.txt" rel="nofollow"> 查看页面源码</a>
-          
-        
-      </li>
-    
-  </ul>
-
-  
-  <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-            
-  <div class="section" id="id1">
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <article role="main">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <div class="section" id="id1">
 <h1>引言<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id2">
 <h2>本章导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>在第六章中，我们为进程引入了文件的抽象，使得进程能够通过一个统一的接口来读写内核管理的多种不同的 I/O 资源。作为例子，我们实现了匿名管道，并通过它进行了简单的父子进程间的单向通信。其实文件的最早起源于我们需要把数据持久保存在 <strong>持久存储设备</strong> 上的需求。</p>
-<p>大家不要被 <strong>持久存储设备</strong> 这个词给吓住了，这就是指计算机远古时代的卡片、纸带、磁芯、磁鼓，和现在还在使用的磁带、磁盘、硬盘，还有近期逐渐普及的U盘、闪存、固态硬盘 (SSD, Solid-State Drive)等存储设备。我们可以把这些设备叫做 <strong>外存</strong> 。在此之前我们仅使用一种存储，也就是内存（或称 RAM）。相比内存，持久存储设备的读写速度较慢，容量较大，但内存掉电后信息会丢失，外存在掉电之后并不会丢失数据。因此，将需要持久保存的数据从内存写入到外存，或是从外存读入到内存是应用和操作系统必不可少的一种需求。</p>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>文件系统在UNIX操作系统有着特殊的地位，根据史料《UNIX: A History and a Memoir》记载，1969年，Ken Thompson（Unix的作者）在贝尔实验室比较闲，写了PDP-7计算机的磁盘调度算法来提高磁盘的吞吐量。为了测试这个算法，他本来想写一个批量读写数据的测试程序。但写着写着，他在某一时刻发现，这个测试程序再扩展一下，就是一个文件系统了，再再扩展一下，就是一个操作系统了。他的自觉告诉他，他离实现一个操作系统仅有 <strong>三周之遥</strong> 。一周：写代码编辑器；一周：写汇编器；一周写shell程序，在写这些程序的同时，需要添加操作系统的功能（如 exec等系统调用）以支持这些应用。结果三周后，为测试磁盘调度算法性能的UNIX雏形诞生了。</p>
-</div>
-<p>本章我们将实现一个简单的文件系统 – easyfs，能够对 <strong>持久存储设备</strong> (Persistent Storage) 这种 I/O 资源进行管理。对于应用访问持久存储设备的需求，内核需要新增两种文件：常规文件和目录文件，它们均以文件系统所维护的 <strong>磁盘文件</strong> 形式被组织并保存在持久存储设备上。</p>
-<p>同时，由于我们进一步完善了对 <strong>文件</strong> 这一抽象概念的实现，我们可以更容易建立 ” <strong>一切皆文件</strong> “ (Everything is a file) 的UNIX的重要设计哲学。我们可扩展与应用程序执行相关的 <code class="docutils literal notranslate"><span class="pre">exec</span></code> 系统调用，加入对程序运行参数的支持，并进一步改进了对shell程序自身的实现，加入对重定向符号 <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> 、 <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> 的识别和处理。这样我们也可以像UNIX中的shell程序一样，基于文件机制实现灵活的I/O重定位和管道操作，更加灵活地把应用程序组合在一起实现复杂功能。</p>
+<p>本章我们将实现一个简单的文件系统 – easyfs，能够对 <strong>持久存储设备</strong> (Persistent Storage) I/O 资源进行管理；将设计两种文件：常规文件和目录文件，它们均以文件系统所维护的 <strong>磁盘文件</strong> 形式被组织并保存在持久存储设备上。</p>
+<p>我们还将扩展 <code class="docutils literal notranslate"><span class="pre">exec</span></code> 系统调用，使之能传递运行参数，并进一步改进 shell 程序，使其支持重定向符号 <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> 和 <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> 。</p>
 </div>
 <div class="section" id="id3">
 <h2>实践体验<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>获取本章代码：</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone https://github.com/rcore-os/rCore-Tutorial-v3.git
-<span class="gp">$ </span><span class="nb">cd</span> rCore-Tutorial-v3
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone https://github.com/zhanghx0905/rCore-Tutorial-2021Autumn.git
+<span class="gp">$ </span><span class="nb">cd</span> rCore-Tutorial-2021Autumn
 <span class="gp">$ </span>git checkout ch7
 </pre></div>
 </div>
 <p>在 qemu 模拟器上运行本章代码：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> os
 <span class="gp">$ </span>make run
-</pre></div>
-</div>
-<p>若要在 k210 平台上运行，首先需要将 microSD 通过读卡器插入 PC ，然后将打包应用 ELF 的文件系统镜像烧写到 microSD 中：</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> os
-<span class="gp">$ </span>make sdcard
-<span class="go">Are you sure write to /dev/sdb ? [y/N]</span>
-<span class="go">y</span>
-<span class="go">16+0 records in</span>
-<span class="go">16+0 records out</span>
-<span class="go">16777216 bytes (17 MB, 16 MiB) copied, 1.76044 s, 9.5 MB/s</span>
-<span class="go">8192+0 records in</span>
-<span class="go">8192+0 records out</span>
-<span class="go">4194304 bytes (4.2 MB, 4.0 MiB) copied, 3.44472 s, 1.2 MB/s</span>
-</pre></div>
-</div>
-<p>途中需要输入 <code class="docutils literal notranslate"><span class="pre">y</span></code> 确认将文件系统烧写到默认的 microSD 所在位置 <code class="docutils literal notranslate"><span class="pre">/dev/sdb</span></code> 中。这个位置可以在 <code class="docutils literal notranslate"><span class="pre">os/Makefile</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">SDCARD</span></code> 处进行修改，在烧写之前请确认它被正确配置为 microSD 的实际位置，否则可能会造成数据损失。</p>
-<p>烧写之后，将 microSD 插入到 Maix 系列开发板并连接到 PC，然后在开发板上运行本章代码：</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> os
-<span class="gp">$ </span>make run <span class="nv">BOARD</span><span class="o">=</span>k210
 </pre></div>
 </div>
 <p>内核初始化完成之后就会进入shell程序，在这里我们运行一下本章的测例 <code class="docutils literal notranslate"><span class="pre">filetest_simple</span></code> ：</p>
@@ -281,7 +308,7 @@ Shell: Process 2 exited with code 0
 &gt;&gt;
 </pre></div>
 </div>
-<p>它会将 <code class="docutils literal notranslate"><span class="pre">Hello,</span> <span class="pre">world!</span></code> 输出到另一个文件 <code class="docutils literal notranslate"><span class="pre">filea</span></code> ，并读取里面的内容确认输出正确。我们也可以通过命令行工具 <code class="docutils literal notranslate"><span class="pre">cat</span></code> 来更直观的查看 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 中的内容：</p>
+<p>它会将 <code class="docutils literal notranslate"><span class="pre">Hello,</span> <span class="pre">world!</span></code> 输出到另一个文件 <code class="docutils literal notranslate"><span class="pre">filea</span></code> ，并读取里面的内容确认输出正确。我们也可以通过命令行工具 <code class="docutils literal notranslate"><span class="pre">cat</span></code> 来查看 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 中的内容：</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;&gt; cat filea
 Hello, world!
 Shell: Process 2 exited with code 0
@@ -307,210 +334,184 @@ Shell: Process 2 exited with code 0
 </div>
 <div class="section" id="id4">
 <h2>本章代码树<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span>./os/src
-<span class="linenos">  2</span>Rust        32 Files    2893 Lines
-<span class="linenos">  3</span>Assembly     3 Files      88 Lines
-<span class="linenos">  4</span>./easyfs/src
-<span class="linenos">  5</span>Rust         7 Files     908 Lines
-<span class="linenos">  6</span>├── bootloader
-<span class="linenos">  7</span>│   ├── rustsbi-k210.bin
-<span class="linenos">  8</span>│   └── rustsbi-qemu.bin
-<span class="linenos">  9</span>├── Dockerfile
-<span class="linenos"> 10</span>├── easy-fs(新增：从内核中独立出来的一个简单的文件系统 EasyFileSystem 的实现)
-<span class="linenos"> 11</span>│   ├── Cargo.toml
-<span class="linenos"> 12</span>│   └── src
-<span class="linenos"> 13</span>│       ├── bitmap.rs(位图抽象)
-<span class="linenos"> 14</span>│       ├── block_cache.rs(块缓存层，将块设备中的部分块缓存在内存中)
-<span class="linenos"> 15</span>│       ├── block_dev.rs(声明块设备抽象接口 BlockDevice，需要库的使用者提供其实现)
-<span class="linenos"> 16</span>│       ├── efs.rs(实现整个 EasyFileSystem 的磁盘布局)
-<span class="linenos"> 17</span>│       ├── layout.rs(一些保存在磁盘上的数据结构的内存布局)
-<span class="linenos"> 18</span>│       ├── lib.rs
-<span class="linenos"> 19</span>│       └── vfs.rs(提供虚拟文件系统的核心抽象，即索引节点 Inode)
-<span class="linenos"> 20</span>├── easy-fs-fuse(新增：将当前 OS 上的应用可执行文件按照 easy-fs 的格式进行打包)
-<span class="linenos"> 21</span>│   ├── Cargo.toml
-<span class="linenos"> 22</span>│   └── src
-<span class="linenos"> 23</span>│       └── main.rs
-<span class="linenos"> 24</span>├── LICENSE
-<span class="linenos"> 25</span>├── Makefile
-<span class="linenos"> 26</span>├── os
-<span class="linenos"> 27</span>│   ├── build.rs
-<span class="linenos"> 28</span>│   ├── Cargo.toml(修改：新增 Qemu 和 K210 两个平台的块设备驱动依赖 crate)
-<span class="linenos"> 29</span>│   ├── Makefile(修改：新增文件系统的构建流程)
-<span class="linenos"> 30</span>│   └── src
-<span class="linenos"> 31</span>│       ├── config.rs(修改：新增访问块设备所需的一些 MMIO 配置)
-<span class="linenos"> 32</span>│       ├── console.rs
-<span class="linenos"> 33</span>│       ├── drivers(修改：新增 Qemu 和 K210 两个平台的块设备驱动)
-<span class="linenos"> 34</span>│       │   ├── block
-<span class="linenos"> 35</span>│       │   │   ├── mod.rs(将不同平台上的块设备全局实例化为 BLOCK_DEVICE 提供给其他模块使用)
-<span class="linenos"> 36</span>│       │   │   ├── sdcard.rs(K210 平台上的 microSD 块设备, Qemu不会用)
-<span class="linenos"> 37</span>│       │   │   └── virtio_blk.rs(Qemu 平台的 virtio-blk 块设备)
-<span class="linenos"> 38</span>│       │   └── mod.rs
-<span class="linenos"> 39</span>│       ├── entry.asm
-<span class="linenos"> 40</span>│       ├── fs(修改：在文件系统中新增常规文件的支持)
-<span class="linenos"> 41</span>│       │   ├── inode.rs(新增：将 easy-fs 提供的 Inode 抽象封装为内核看到的 OSInode
-<span class="linenos"> 42</span>│       │   │            并实现 fs 子模块的 File Trait)
-<span class="linenos"> 43</span>│       │   ├── mod.rs
-<span class="linenos"> 44</span>│       │   ├── pipe.rs
-<span class="linenos"> 45</span>│       │   └── stdio.rs
-<span class="linenos"> 46</span>│       ├── lang_items.rs
-<span class="linenos"> 47</span>│       ├── link_app.S
-<span class="linenos"> 48</span>│       ├── linker-k210.ld
-<span class="linenos"> 49</span>│       ├── linker-qemu.ld
-<span class="hll"><span class="linenos"> 50</span>│       ├── loader.rs(移除：应用加载器 loader 子模块，本章开始从文件系统中加载应用)
-</span><span class="linenos"> 51</span>│       ├── main.rs
-<span class="linenos"> 52</span>│       ├── mm
-<span class="linenos"> 53</span>│       │   ├── address.rs
-<span class="linenos"> 54</span>│       │   ├── frame_allocator.rs
-<span class="linenos"> 55</span>│       │   ├── heap_allocator.rs
-<span class="linenos"> 56</span>│       │   ├── memory_set.rs(修改：在创建地址空间的时候插入 MMIO 虚拟页面)
-<span class="linenos"> 57</span>│       │   ├── mod.rs
-<span class="linenos"> 58</span>│       │   └── page_table.rs
-<span class="linenos"> 59</span>│       ├── sbi.rs
-<span class="linenos"> 60</span>│       ├── syscall
-<span class="linenos"> 61</span>│       │   ├── fs.rs(修改：新增 sys_open/sys_dup)
-<span class="linenos"> 62</span>│       │   ├── mod.rs
-<span class="linenos"> 63</span>│       │   └── process.rs(修改：sys_exec 改为从文件系统中加载 ELF，并支持命令行参数)
-<span class="linenos"> 64</span>│       ├── task
-<span class="linenos"> 65</span>│       │   ├── context.rs
-<span class="linenos"> 66</span>│       │   ├── manager.rs
-<span class="linenos"> 67</span>│       │   ├── mod.rs(修改初始进程 INITPROC 的初始化)
-<span class="linenos"> 68</span>│       │   ├── pid.rs
-<span class="linenos"> 69</span>│       │   ├── processor.rs
-<span class="linenos"> 70</span>│       │   ├── switch.rs
-<span class="linenos"> 71</span>│       │   ├── switch.S
-<span class="linenos"> 72</span>│       │   └── task.rs
-<span class="linenos"> 73</span>│       ├── timer.rs
-<span class="linenos"> 74</span>│       └── trap
-<span class="linenos"> 75</span>│           ├── context.rs
-<span class="linenos"> 76</span>│           ├── mod.rs
-<span class="linenos"> 77</span>│           └── trap.S
-<span class="linenos"> 78</span>├── README.md
-<span class="linenos"> 79</span>├── rust-toolchain
-<span class="linenos"> 80</span>├── tools
-<span class="linenos"> 81</span>│   ├── kflash.py
-<span class="linenos"> 82</span>│   ├── LICENSE
-<span class="linenos"> 83</span>│   ├── package.json
-<span class="linenos"> 84</span>│   ├── README.rst
-<span class="linenos"> 85</span>│   └── setup.py
-<span class="linenos"> 86</span>└── user
-<span class="linenos"> 87</span>   ├── Cargo.lock
-<span class="linenos"> 88</span>   ├── Cargo.toml
-<span class="linenos"> 89</span>   ├── Makefile
-<span class="linenos"> 90</span>   └── src
-<span class="linenos"> 91</span>      ├── bin
-<span class="linenos"> 92</span>      │   ├── cat.rs(新增)
-<span class="linenos"> 93</span>      │   ├── cmdline_args.rs(新增)
-<span class="linenos"> 94</span>      │   ├── exit.rs
-<span class="linenos"> 95</span>      │   ├── fantastic_text.rs
-<span class="linenos"> 96</span>      │   ├── filetest_simple.rs(新增：简单文件系统测例)
-<span class="linenos"> 97</span>      │   ├── forktest2.rs
-<span class="linenos"> 98</span>      │   ├── forktest.rs
-<span class="linenos"> 99</span>      │   ├── forktest_simple.rs
-<span class="linenos">100</span>      │   ├── forktree.rs
-<span class="linenos">101</span>      │   ├── hello_world.rs
-<span class="linenos">102</span>      │   ├── initproc.rs
-<span class="linenos">103</span>      │   ├── matrix.rs
-<span class="linenos">104</span>      │   ├── pipe_large_test.rs
-<span class="linenos">105</span>      │   ├── pipetest.rs
-<span class="linenos">106</span>      │   ├── run_pipe_test.rs
-<span class="linenos">107</span>      │   ├── sleep.rs
-<span class="linenos">108</span>      │   ├── sleep_simple.rs
-<span class="linenos">109</span>      │   ├── stack_overflow.rs
-<span class="linenos">110</span>      │   ├── user_shell.rs(修改：支持命令行参数解析和输入/输出重定向)
-<span class="linenos">111</span>      │   ├── usertests.rs
-<span class="linenos">112</span>      │   └── yield.rs
-<span class="linenos">113</span>      ├── console.rs
-<span class="linenos">114</span>      ├── lang_items.rs
-<span class="linenos">115</span>      ├── lib.rs(修改：支持命令行参数解析)
-<span class="linenos">116</span>      ├── linker.ld
-<span class="linenos">117</span>      └── syscall.rs(修改：新增 sys_open 和 sys_dup)
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>├── easy-fs(新增：从内核中独立出来的一个简单的文件系统 EasyFileSystem 的实现)
+<span class="linenos"> 2</span>│   ├── Cargo.toml
+<span class="linenos"> 3</span>│   └── src
+<span class="linenos"> 4</span>│       ├── bitmap.rs(位图抽象)
+<span class="linenos"> 5</span>│       ├── block_cache.rs(块缓存层，将块设备中的部分块缓存在内存中)
+<span class="linenos"> 6</span>│       ├── block_dev.rs(声明块设备抽象接口 BlockDevice，需要库的使用者提供其实现)
+<span class="linenos"> 7</span>│       ├── efs.rs(实现整个 EasyFileSystem 的磁盘布局)
+<span class="linenos"> 8</span>│       ├── layout.rs(一些保存在磁盘上的数据结构的内存布局)
+<span class="linenos"> 9</span>│       ├── lib.rs
+<span class="linenos">10</span>│       └── vfs.rs(提供虚拟文件系统的核心抽象，即索引节点 Inode)
+<span class="linenos">11</span>├── easy-fs-fuse(新增：将当前 OS 上的应用可执行文件按照 easy-fs 的格式进行打包)
+<span class="linenos">12</span>│   ├── Cargo.toml
+<span class="linenos">13</span>│   └── src
+<span class="linenos">14</span>│       └── main.rs
+<span class="linenos">15</span>├── os
+<span class="linenos">16</span>    ├── build.rs
+<span class="linenos">17</span>    ├── Cargo.toml(修改：新增 Qemu 的块设备驱动依赖 crate)
+<span class="linenos">18</span>    ├── Makefile(修改：新增文件系统的构建流程)
+<span class="linenos">19</span>    └── src
+<span class="linenos">20</span>        ├── config.rs(修改：新增访问块设备所需的一些 MMIO 配置)
+<span class="linenos">21</span>        ├── ...
+<span class="linenos">22</span>        ├── drivers(修改：新增 Qemu 平台的块设备驱动)
+<span class="linenos">23</span>        │   ├── block
+<span class="linenos">24</span>        │   │   ├── mod.rs(将不同平台上的块设备全局实例化为 BLOCK_DEVICE 提供给其他模块使用)
+<span class="linenos">25</span>        │   │   └── virtio_blk.rs(Qemu 平台的 virtio-blk 块设备)
+<span class="linenos">26</span>        │   └── mod.rs
+<span class="linenos">27</span>        ├── fs(修改：在文件系统中新增常规文件的支持)
+<span class="linenos">28</span>        │   ├── inode.rs(新增：将 easy-fs 提供的 Inode 抽象封装为内核看到的 OSInode
+<span class="linenos">29</span>        │   │            并实现 fs 子模块的 File Trait)
+<span class="linenos">30</span>        │   ├── mod.rs
+<span class="linenos">31</span>        │   ├── pipe.rs
+<span class="linenos">32</span>        │   └── stdio.rs
+<span class="linenos">33</span>        ├── loader.rs(移除：应用加载器 loader 子模块，本章开始从文件系统中加载应用)
+<span class="linenos">34</span>        ├── mm
+<span class="linenos">35</span>        │   ├── address.rs
+<span class="linenos">36</span>        │   ├── frame_allocator.rs
+<span class="linenos">37</span>        │   ├── heap_allocator.rs
+<span class="linenos">38</span>        │   ├── memory_set.rs(修改：在创建地址空间的时候插入 MMIO 虚拟页面)
+<span class="linenos">39</span>        │   ├── mod.rs
+<span class="linenos">40</span>        │   └── page_table.rs
+<span class="linenos">41</span>        ├── syscall
+<span class="linenos">42</span>        │   ├── fs.rs(修改：新增 sys_open/sys_dup)
+<span class="linenos">43</span>        │   ├── mod.rs
+<span class="linenos">44</span>        │   └── process.rs(修改：sys_exec 改为从文件系统中加载 ELF，并支持命令行参数)
+<span class="linenos">45</span>        ├── task
+<span class="linenos">46</span>            ├── context.rs
+<span class="linenos">47</span>            ├── manager.rs
+<span class="linenos">48</span>            ├── mod.rs(修改初始进程 INITPROC 的初始化)
+<span class="linenos">49</span>            ├── pid.rs
+<span class="linenos">50</span>            ├── processor.rs
+<span class="linenos">51</span>            ├── switch.rs
+<span class="linenos">52</span>            ├── switch.S
+<span class="linenos">53</span>            └── task.rs
+<span class="linenos">54</span>
+<span class="linenos">55</span>cloc easy-fs os
+<span class="linenos">56</span>-------------------------------------------------------------------------------
+<span class="linenos">57</span>Language                     files          blank        comment           code
+<span class="linenos">58</span>-------------------------------------------------------------------------------
+<span class="linenos">59</span>Rust                            42            277            208           3433
+<span class="linenos">60</span>Assembly                         4             23             26            256
+<span class="linenos">61</span>make                             1             12              4             45
+<span class="linenos">62</span>TOML                             2              4              2             22
+<span class="linenos">63</span>-------------------------------------------------------------------------------
+<span class="linenos">64</span>SUM:                            49            316            240           3756
+<span class="linenos">65</span>-------------------------------------------------------------------------------
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>本章代码导读<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
-<p>本章涉及的代码量相对较多，且与进程执行相关的管理还有直接的关系。其实我们是参考经典的UNIX基于索引的文件系统，设计了一个简化的有一级目录并支持创建/打开/读写/关闭文件一系列操作的文件系统。这里简要介绍一下在内核中添加文件系统的大致开发过程。</p>
-<p>第一步是能够写出与文件访问相关的应用。这里是参考了Linux的创建/打开/读写/关闭文件的系统调用接口，力图实现一个 <a class="reference internal" href="1fs-interface.html#fs-simplification"><span class="std std-ref">简化版的文件系统模型</span></a> 。在用户态我们只需要遵从相关系统调用的接口约定，在用户库里完成对应的封装即可。这一过程我们在前面的章节中已经重复过多次，读者应当对其比较熟悉。其中最为关键的是系统调用可以参考 <a class="reference internal" href="1fs-interface.html#sys-open"><span class="std std-ref">sys_open 语义介绍</span></a> ，此外我们还给出了 <a class="reference internal" href="1fs-interface.html#filetest-simple"><span class="std std-ref">测例代码解读</span></a> 。</p>
-<p>第二步就是要实现 easyfs 文件系统了。由于 Rust 语言的特点，我们可以在用户态实现 easyfs 文件系统，并在用户态完成文件系统功能的基本测试并基本验证其实现正确性之后，就可以放心的将该模块嵌入到操作系统内核中。当然，有了文件系统的具体实现，还需要对上一章的操作系统内核进行扩展，实现与 easyfs 文件系统对接的接口，这样才可以让操作系统拥有一个简单可用的文件系统。从而，内核可以支持允许文件读写功能的更复杂的应用，在命令行参数机制的加持下，可以进一步提升整个系统的灵活性，让应用的开发和调试变得更为轻松。</p>
-<p>easyfs 文件系统的整体架构自下而上可分为五层。它的最底层就是对块设备的访问操作接口。在 <code class="docutils literal notranslate"><span class="pre">easy-fs/src/block_dev.rs</span></code> 中，可以看到 <code class="docutils literal notranslate"><span class="pre">BlockDevice</span></code> trait 代表了一个抽象块设备，该 trait 仅需求两个函数 <code class="docutils literal notranslate"><span class="pre">read_block</span></code> 和 <code class="docutils literal notranslate"><span class="pre">write_block</span></code> ，分别代表将数据从块设备读到内存中的缓冲区中，或者将数据从内存中的缓冲区写回到块设备中，数据需要以块为单位进行读写。easy-fs 库的使用者需要负责为它们看到的实际的块设备具体实现 <code class="docutils literal notranslate"><span class="pre">BlockDevice</span></code> trait 并提供给 easy-fs 库的上层，这样的话 easy-fs 库的最底层就与一个具体的执行环境对接起来了。至于为什么块设备层位于 easy-fs 的最底层，是因为文件系统仅仅是在块设备上存储的结构稍微复杂一点的数据，但无论它的操作变换如何复杂，从块设备的角度终究可以被分解成若干次块读写。</p>
-<p>尽管在最底层我们就已经有了块读写的能力，但从编程方便性和性能的角度，仅有块读写这么基础的底层接口是不足以实现如此复杂的文件系统的，虽然它已经被我们大幅简化过了。比如，将一个块的内容读到内存的缓冲区，对缓冲区进行修改，并尚未写回的时候，如果由于编程上的不小心再次将该块的内容读到另一个缓冲区，而不是使用已有的缓冲区，这将会造成不一致问题。此外还有可能增加很多不必要的块读写次数，大幅降低文件系统的性能。因此，通过程序自动而非程序员手动对块的缓冲区进行统一管理也就势在必行了，该机制被我们抽象为 easy-fs 自底向上的第二层，即块缓存层。在 <code class="docutils literal notranslate"><span class="pre">easy-fs/src/block_cache.rs</span></code> 中， <code class="docutils literal notranslate"><span class="pre">BlockCache</span></code> 代表一个被我们管理起来的块的缓冲区，它带有缓冲区本体以及块的编号等信息。当它被创建的时候，将触发一次 <code class="docutils literal notranslate"><span class="pre">read_block</span></code> 将数据从块设备读到它的缓冲区中。接下来只要它驻留在内存中，便可保证对于同一个块的所有操作都会直接在它的缓冲区中进行而无需额外的 <code class="docutils literal notranslate"><span class="pre">read_block</span></code> 。块缓存管理器 <code class="docutils literal notranslate"><span class="pre">BlockManager</span></code> 在内存中管理有限个 <code class="docutils literal notranslate"><span class="pre">BlockCache</span></code> 并实现了类似 FIFO 的缓存替换算法，当一个块缓存被换出的时候视情况可能调用 <code class="docutils literal notranslate"><span class="pre">write_block</span></code> 将缓冲区数据写回块设备。总之，块缓存层对上提供 <code class="docutils literal notranslate"><span class="pre">get_block_cache</span></code> 接口来屏蔽掉相关细节，从而可以透明的读写一个块。</p>
-<p>有了块缓存，我们就可以在内存中方便地处理easyfs文件系统在磁盘上的各种数据了，这就是第三层文件系统的磁盘数据结构。easyfs文件系统中的所有需要持久保存的数据都会放到磁盘上，这包括了管理这个文件系统的 <strong>超级块 (Super Block)</strong>，管理空闲磁盘块的 <strong>索引节点位图区</strong> 和  <strong>数据块位图区</strong> ，以及管理文件的 <strong>索引节点区</strong> 和 放置文件数据的 <strong>数据块区</strong> 组成。</p>
-<p>easyfs文件系统中管理这些磁盘数据的控制逻辑主要集中在 <strong>磁盘块管理器</strong> 中，这是文件系统的第四层。对于文件系统管理而言，其核心是 <code class="docutils literal notranslate"><span class="pre">EasyFileSystem</span></code> 数据结构及其关键成员函数：</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>EasyFileSystem.create：创建文件系统</p></li>
-<li><p>EasyFileSystem.open：打开文件系统</p></li>
-<li><p>EasyFileSystem.alloc_inode：分配inode （dealloc_inode未实现，所以还不能删除文件）</p></li>
-<li><p>EasyFileSystem.alloc_data：分配数据块</p></li>
-<li><p>EasyFileSystem.dealloc_data：回收数据块</p></li>
-</ul>
-</div></blockquote>
-<p>对于单个文件的管理和读写的控制逻辑主要是 <strong>索引节点</strong> 来完成，这是文件系统的第五层，其核心是 <code class="docutils literal notranslate"><span class="pre">Inode</span></code> 数据结构及其关键成员函数：</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Inode.new：在磁盘上的文件系统中创建一个inode</p></li>
-<li><p>Inode.find：根据文件名查找对应的磁盘上的inode</p></li>
-<li><p>Inode.create：在根目录下创建一个文件</p></li>
-<li><p>Inode.read_at：根据inode找到文件数据所在的磁盘数据块，并读到内存中</p></li>
-<li><p>Inode.write_at：根据inode找到文件数据所在的磁盘数据块，把内存中数据写入到磁盘数据块中</p></li>
-</ul>
-</div></blockquote>
-<p>上述五层就构成了easyfs文件系统的整个内容。我们可以把easyfs文件系统看成是一个库，被应用程序调用。而 <code class="docutils literal notranslate"><span class="pre">easy-fs-fuse</span></code> 这个应用就通过调用easyfs文件系统库中各种函数，并用Linux上的文件模拟了一个块设备，就可以在这个模拟的块设备上创建了一个easyfs文件系统。</p>
-<p>第三步，我们需要把easyfs文件系统加入到我们的操作系统内核中。这还需要做两件事情，第一件是在Qemu模拟的 <code class="docutils literal notranslate"><span class="pre">virtio</span></code> 块设备上实现块设备驱动程序 <code class="docutils literal notranslate"><span class="pre">os/src/drivers/block/virtio_blk.rs</span></code> 。由于我们可以直接使用 <code class="docutils literal notranslate"><span class="pre">virtio-drivers</span></code> crate中的块设备驱动，所以只要提供这个块设备驱动所需要的内存申请与释放以及虚实地址转换的4个函数就可以了。而我们之前操作系统中的虚存管理实现中，以及有这些函数，导致块设备驱动程序很简单，具体实现细节都被 <code class="docutils literal notranslate"><span class="pre">virtio-drivers</span></code> crate封装好了。</p>
-<p>第二件事情是把文件访问相关的系统调用与easyfs文件系统连接起来。在easfs文件系统中是没有进程的概念的。而进程是程序运行过程中访问资源的管理实体，这就要对 <code class="docutils literal notranslate"><span class="pre">easy-fs</span></code> crate 提供的 <code class="docutils literal notranslate"><span class="pre">Inode</span></code> 结构进一步封装，形成 <code class="docutils literal notranslate"><span class="pre">OSInode</span></code> 结构，以表示进程中一个打开的常规文件。对于应用程序而言，它理解的磁盘数据是常规的文件和目录，不是 <code class="docutils literal notranslate"><span class="pre">OSInode</span></code> 这样相对复杂的结构。其实常规文件对应的 OSInode 是文件在操作系统内核中的内部表示，因此需要为它实现 File Trait 从而能够可以将它放入到进程文件描述符表中，并通过 sys_read/write 系统调用进行读写。这样就建立了文件与 <code class="docutils literal notranslate"><span class="pre">OSInode</span></code> 的对应关系，并通过上面描述的三个步骤完成了包含文件系统的操作系统内核，并能给应用提供基于文件的系统调用服务。</p>
-<p>完成包含文件系统的操作系统内核后，我们在shell程序和内核中支持命令行参数的解析和传递，这样可以让应用根据灵活地通过命令行参数来动态地表示要操作的文件。这需要扩展对应的系统调用 <code class="docutils literal notranslate"><span class="pre">sys_exec</span></code> ,主要的改动就是在创建新进程时，把命令行参数压入用户栈中，这样应用程序在执行时就可以从用户栈中获取到命令行的参数值了。</p>
-<p>在上一章，我们提到了把标准输出设备在文件描述符表中的文件描述符的值规定为 1 ，用 Stdin 表示；把标准输入设备在文件描述符表中的文件描述符的值规定为 0，用 stdout 表示 。另外，还有一条文件描述符相关的重要规则：即进程打开一个文件的时候，内核总是会将文件分配到该进程文件描述符表中编号 最小的 空闲位置。利用这些约定，只实现新的系统调用 <code class="docutils literal notranslate"><span class="pre">sys_dup</span></code> 完成对文件描述符的复制，就可以巧妙地实现标准 I/O 重定向功能了。</p>
-<p>具体思路是，在某应用进程执行之前，父进程（比如 user_shell进程）要对子应用进程的文件描述符表进行某种替换。以输出为例，父进程在创建子进程前，提前打开一个常规文件 A，然后 <code class="docutils literal notranslate"><span class="pre">fork</span></code> 子进程，在子进程的最初执行中，通过 <code class="docutils literal notranslate"><span class="pre">sys_close</span></code> 关闭 Stdout 文件描述符，用 <code class="docutils literal notranslate"><span class="pre">sys_dup</span></code> 复制常规文件 A 的文件描述符，这样 Stdout 文件描述符实际上指向的就是常规文件A了，这时再通过 <code class="docutils literal notranslate"><span class="pre">sys_close</span></code> 关闭常规文件 A 的文件描述符。至此，常规文件 A 替换掉了应用文件描述符表位置 1 处的标准输出文件，这就完成了所谓的 <strong>重定向</strong> ，即完成了执行新应用前的准备工作。</p>
-<p>接下来是子进程调用 <code class="docutils literal notranslate"><span class="pre">sys_exec</span></code> 系统调用，创建并开始执行新子应用进程。在重定向之后，新的子应用进程认为自己输出到 fd=1 的标准输出文件，但实际上是输出到父进程（比如 user_shell进程）指定的文件A中。文件这一抽象概念透明化了文件、I/O设备之间的差异，因为在进程看来无论是标准输出还是常规文件都是一种文件，可以通过同样的接口来读写。这就是文件的强大之处。</p>
-</div>
 </div>
 
+      </article>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="1fs-interface.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">文件系统接口</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第七章：文件系统与I/O重定向</div>
+                
+              </div>
+            </a>
+        </div>
 
-           </div>
-           
-          </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="1fs-interface.html" class="btn btn-neutral float-right" title="文件系统接口" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="第七章：文件系统与I/O重定向" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+        <div class="related-information">
+              Copyright &#169; OS2021Autumn
+            |
+            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+              and
+              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+              <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            |
+            <a class="muted-link" href="../_sources/chapter7/0intro.rst.txt"
+               rel="nofollow">
+              显示源代码
+            </a>
+        </div>
+        
+      </footer>
     </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">引言</a><ul>
+<li><a class="reference internal" href="#id2">本章导读</a></li>
+<li><a class="reference internal" href="#id3">实践体验</a></li>
+<li><a class="reference internal" href="#id4">本章代码树</a></li>
+</ul>
+</li>
+</ul>
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &#169; 版权所有 OS2021Autumn.
-
-    </p>
-  </div>
-    
-    
-    
-    利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用了 
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
-    
-    由 <a href="https://readthedocs.org">Read the Docs</a>开发. 
-
-</footer>
+          </div>
         </div>
       </div>
-
-    </section>
-
+      
+      
+    </aside>
   </div>
-  
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/main.js"></script>
+    <script kind="utterances">
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
+    var commentsRunWhenDOMLoaded = cb => {
+    if (document.readyState != 'loading') {
+        cb()
+    } else if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', cb)
+    } else {
+        document.attachEvent('onreadystatechange', function() {
+        if (document.readyState == 'complete') cb()
+        })
+    }
+}
 
-  
-  
-    
-   
+var addUtterances = () => {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://utteranc.es/client.js";
+    script.async = "async";
 
-</body>
+    script.setAttribute("repo", "duskmoon314/rCore-Tutorial-Book-v3");
+    script.setAttribute("issue-term", "pathname");
+    script.setAttribute("theme", "github-light");
+    script.setAttribute("label", "comments");
+    script.setAttribute("crossorigin", "anonymous");
+
+    sections = document.querySelectorAll("div.section");
+    if (sections !== null) {
+        section = sections[sections.length-1];
+        section.appendChild(script);
+    }
+}
+commentsRunWhenDOMLoaded(addUtterances);
+</script>
+    <script src="../_static/translations.js"></script>
+    </body>
 </html>
