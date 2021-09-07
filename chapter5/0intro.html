@@ -230,15 +230,13 @@ commentsRunWhenDOMLoaded(addUtterances);
 <h1>引言<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id2">
 <h2>本章导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>从本章开始，我们将不再接触底层硬件机制，事情会变得轻松很多。</p>
 <p>我们将开发一个用户 <strong>终端</strong> (Terminal) 或 <strong>命令行</strong> (Command Line Application, 俗称 <strong>Shell</strong> ) ，
 形成用户与操作系统进行交互的命令行界面 (Command Line Interface)。</p>
-<p>我们需要在已有的 <strong>任务</strong> 抽象的基础上进一步扩展，形成新的抽象： <strong>进程</strong> ，并实现若干基于 <strong>进程</strong> 的强大系统调用。</p>
+<p>为此，我们要对任务建立新的抽象： <strong>进程</strong> ，并实现若干基于 <strong>进程</strong> 的强大系统调用。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p><strong>任务和进程的关系与区别</strong></p>
-<p>第三章提到的 <strong>任务</strong> 是这里提到的 <strong>进程</strong> 的初级阶段，还没进化到拥有更强大的动态变化的功能：
-进程可以在运行中创建 <strong>子进程</strong> 、 用新的 <strong>程序</strong> 内容覆盖已有的 <strong>程序</strong> 内容、可管理更多物理或虚拟 <strong>资源</strong> 。</p>
+<p>第三章提到的 <strong>任务</strong> 是这里提到的 <strong>进程</strong> 的初级阶段，与任务相比，进程能在运行中创建 <strong>子进程</strong> 、 用新的 <strong>程序</strong> 内容覆盖已有的 <strong>程序</strong> 内容、可管理更多物理或虚拟 <strong>资源</strong> 。</p>
 </div>
 </div>
 <div class="section" id="id3">

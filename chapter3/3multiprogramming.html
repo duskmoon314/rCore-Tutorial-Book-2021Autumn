@@ -232,7 +232,7 @@ commentsRunWhenDOMLoaded(addUtterances);
             
   <div class="section" id="id1">
 <h1>管理多道程序<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
-<p>而内核为了管理任务，需要维护 <strong>任务</strong> 信息</p>
+<p>而内核为了管理任务，需要维护任务信息，相关内容包括：</p>
 <ul class="simple">
 <li><p>任务运行状态：未初始化、准备执行、正在执行、已退出</p></li>
 <li><p>任务控制块：维护任务状态和任务上下文</p></li>
@@ -245,7 +245,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 开始时，蓝色应用向外设提交了一个请求，外设随即开始工作，
 但是它要一段时间后才能返回结果。蓝色应用于是调用 <code class="docutils literal notranslate"><span class="pre">sys_yield</span></code> 交出 CPU 使用权，
 内核让绿色应用继续执行。一段时间后 CPU 切换回蓝色应用，发现外设仍未返回结果，
-于是再次 <code class="docutils literal notranslate"><span class="pre">sys_yield</span></code> 。直到再次切换回蓝色应用，外设才处理完请求，于是蓝色应用终于可以向下执行了。</p>
+于是再次 <code class="docutils literal notranslate"><span class="pre">sys_yield</span></code> 。直到第二次切换回蓝色应用，外设才处理完请求，于是蓝色应用终于可以向下执行了。</p>
 <p>我们还会遇到很多其他需要等待其完成才能继续向下执行的事件，调用 <code class="docutils literal notranslate"><span class="pre">sys_yield</span></code> 可以避免等待过程造成的资源浪费。</p>
 <div class="literal-block-wrapper docutils container" id="id5">
 <div class="code-block-caption"><span class="caption-text">第三章新增系统调用（一）</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
@@ -284,7 +284,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="linenos">9</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>除了任务状态外，还需要保存任务上下文，一并位于名为 <strong>任务控制块</strong> (Task Control Block) 的数据结构中：</p>
+<p>任务状态外和任务上下文一并保存在名为 <strong>任务控制块</strong> (Task Control Block) 的数据结构中：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// os/src/task/task.rs</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="cp">#[derive(Copy, Clone)]</span><span class="w"></span>
@@ -312,7 +312,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>这里用到了变量与常量分离的编程风格：字段 <code class="docutils literal notranslate"><span class="pre">num_app</span></code> 表示任务管理器管理的应用的数目，它在 <code class="docutils literal notranslate"><span class="pre">TaskManager</span></code> 初始化后将保持不变；
+<p>这里用到了变量与常量分离的编程风格：字段 <code class="docutils literal notranslate"><span class="pre">num_app</span></code> 表示应用数目，它在 <code class="docutils literal notranslate"><span class="pre">TaskManager</span></code> 初始化后将保持不变；
 而包裹在 <code class="docutils literal notranslate"><span class="pre">TaskManagerInner</span></code> 内的任务控制块数组 <code class="docutils literal notranslate"><span class="pre">tasks</span></code>，以及正在执行的应用编号 <code class="docutils literal notranslate"><span class="pre">current_task</span></code> 会在执行过程中变化。</p>
 <p>初始化 <code class="docutils literal notranslate"><span class="pre">TaskManager</span></code> 的全局实例 <code class="docutils literal notranslate"><span class="pre">TASK_MANAGER</span></code>：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// os/src/task/mod.rs</span>
@@ -439,7 +439,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">run_next_task</span></code> 会调用 <code class="docutils literal notranslate"><span class="pre">find_next_task</span></code> 方法尝试寻找一个运行状态为 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 的应用并获得其 ID 。
 如果找不到， 说明所有应用都执行完了， <code class="docutils literal notranslate"><span class="pre">find_next_task</span></code> 将返回 <code class="docutils literal notranslate"><span class="pre">None</span></code> ，内核 panic 退出。
-如果能够找到下一个可运行应用，我们就调用 <code class="docutils literal notranslate"><span class="pre">__switch</span></code> 接口切换任务。</p>
+如果能够找到下一个可运行应用，我们就调用 <code class="docutils literal notranslate"><span class="pre">__switch</span></code> 切换任务。</p>
 <p>切换任务之前，我们要手动 drop 掉我们获取到的 <code class="docutils literal notranslate"><span class="pre">TaskManagerInner</span></code> 可变引用。
 因为函数还没有返回， <code class="docutils literal notranslate"><span class="pre">inner</span></code> 不会自动销毁。我们只有令 <code class="docutils literal notranslate"><span class="pre">TASK_MANAGER</span></code> 的 <code class="docutils literal notranslate"><span class="pre">inner</span></code> 字段回到未被借用的状态，下次任务切换时才能再借用。</p>
 <p>我们可以总结一下应用的运行状态变化图：</p>
@@ -458,9 +458,9 @@ commentsRunWhenDOMLoaded(addUtterances);
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">init_app_cx</span></code> 在 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 子模块中定义，它在内核栈中压入了一个 Trap 上下文，并返回压入 Trap 上下文后 <code class="docutils literal notranslate"><span class="pre">sp</span></code> 的值。
+<p><code class="docutils literal notranslate"><span class="pre">init_app_cx</span></code> 在 <code class="docutils literal notranslate"><span class="pre">loader</span></code> 子模块中定义，它向内核栈压入了一个 Trap 上下文，并返回压入 Trap 上下文后 <code class="docutils literal notranslate"><span class="pre">sp</span></code> 的值。
 这个 Trap 上下文的构造方式与第二章相同。</p>
-<p><code class="docutils literal notranslate"><span class="pre">goto_restore</span></code> 构造任务上下文，将 <code class="docutils literal notranslate"><span class="pre">sp</span></code> 保存下来，并将 <code class="docutils literal notranslate"><span class="pre">ra</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的入口地址，返回后保存在任务管理器中。</p>
+<p><code class="docutils literal notranslate"><span class="pre">goto_restore</span></code> 保存传入的 <code class="docutils literal notranslate"><span class="pre">sp</span></code>，并将 <code class="docutils literal notranslate"><span class="pre">ra</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的入口地址，构造任务上下文后返回。这样，任务管理器中各个应用的任务上下文就得到了初始化。</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/task/context.rs</span>
 
 <span class="k">impl</span><span class="w"> </span><span class="n">TaskContext</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
