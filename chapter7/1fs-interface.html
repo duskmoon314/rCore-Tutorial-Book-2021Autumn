@@ -2,7 +2,7 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="简易文件系统 easy-fs" href="2fs-implementation.html" /><link rel="prev" title="引言" href="0intro.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="简易文件系统 easy-fs (上)" href="2fs-implementation-1.html" /><link rel="prev" title="引言" href="0intro.html" />
 
     <meta name="generator" content="sphinx-4.1.2, furo 2021.08.31"/>
         <title>文件系统接口 - rCore-Tutorial-Autumn2021 文档</title>
@@ -224,7 +224,8 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">第七章：文件系统与I/O重定向</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0intro.html">引言</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">文件系统接口</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2fs-implementation.html">简易文件系统 easy-fs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2fs-implementation-1.html">简易文件系统 easy-fs (上)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2fs-implementation-2.html">简易文件系统 easy-fs (下)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3using-easy-fs-in-kernel.html">在内核中使用 easy-fs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4cmdargs-and-redirection.html">命令行参数与标准 I/O 重定向</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5exercise.html">chapter7练习</a></li>
@@ -295,9 +296,9 @@
 <div class="section" id="id3">
 <h2>打开与读写文件的系统调用<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <div class="section" id="id4">
-<h3>文件打开<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<h3>打开文件<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="sd">/// 功能：打开一个常规文件，并返回可以访问它的文件描述符。</span>
-<span class="sd">/// 参数：path 描述要打开的文件的文件名（简单起见，文件系统不需要支持目录，所有的文件都放在根目录 / 下），</span>
+<span class="sd">/// 参数：path 描述要打开的文件的文件名，必须以 '\0' 结尾</span>
 <span class="sd">/// flags 描述打开文件的标志，具体含义下面给出。</span>
 <span class="sd">/// 返回值：如果出现了错误则返回 -1，否则返回打开常规文件的文件描述符。可能的错误原因是：文件不存在。</span>
 <span class="sd">/// syscall ID：56</span>
@@ -312,7 +313,6 @@
 <li><p>如果 <code class="docutils literal notranslate"><span class="pre">flags</span></code> 第 9 位被设置（0x200），表示允许创建文件 <em>CREATE</em> ，在找不到该文件的时候应创建文件；如果该文件已经存在则应该将该文件的大小归零；</p></li>
 <li><p>如果 <code class="docutils literal notranslate"><span class="pre">flags</span></code> 第 10 位被设置（0x400），则在打开文件的时候应该清空文件的内容并将该文件的大小归零，也即 <em>TRUNC</em> 。</p></li>
 </ul>
-<p>注意 <code class="docutils literal notranslate"><span class="pre">flags</span></code> 里面的权限设置只能控制进程对本次打开的文件的访问。一般情况下，在打开文件的时候首先需要经过文件系统的权限检查，比如一个文件自身不允许写入，那么进程自然也就不能以 <em>WRONLY</em> 或 <em>RDWR</em> 标志打开文件。但在我们简化版的文件系统中文件不进行权限设置，这一步就可以绕过。</p>
 <p>在用户库 <code class="docutils literal notranslate"><span class="pre">user_lib</span></code> 中，我们将该系统调用封装为 <code class="docutils literal notranslate"><span class="pre">open</span></code> 接口：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// user/src/lib.rs</span>
 
@@ -331,23 +331,12 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>借助 <code class="docutils literal notranslate"><span class="pre">bitflags!</span></code> 宏我们将一个 <code class="docutils literal notranslate"><span class="pre">u32</span></code> 的 flags 包装为一个 <code class="docutils literal notranslate"><span class="pre">OpenFlags</span></code> 结构体更易使用，它的 <code class="docutils literal notranslate"><span class="pre">bits</span></code> 字段可以将自身转回 <code class="docutils literal notranslate"><span class="pre">u32</span></code> ，它也会被传给 <code class="docutils literal notranslate"><span class="pre">sys_open</span></code> ：</p>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// user/src/syscall.rs</span>
-
-<span class="k">const</span><span class="w"> </span><span class="n">SYSCALL_OPEN</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">56</span><span class="p">;</span><span class="w"></span>
-
-<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">sys_open</span><span class="p">(</span><span class="n">path</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span>: <span class="kt">u32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">isize</span> <span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">syscall</span><span class="p">(</span><span class="n">SYSCALL_OPEN</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">path</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>我们在 <code class="docutils literal notranslate"><span class="pre">sys_open</span></code> 传给内核的两个参数只有待打开文件的文件名字符串的起始地址（和之前一样，我们需要保证该字符串以 <code class="docutils literal notranslate"><span class="pre">\0</span></code> 结尾）还有标志位。由于每个通用寄存器为 64 位，我们需要先将 <code class="docutils literal notranslate"><span class="pre">u32</span></code> 的 <code class="docutils literal notranslate"><span class="pre">flags</span></code> 转换为 <code class="docutils literal notranslate"><span class="pre">usize</span></code> 。</p>
+<p>借助 <code class="docutils literal notranslate"><span class="pre">bitflags!</span></code> 宏我们将一个 <code class="docutils literal notranslate"><span class="pre">u32</span></code> 的 flags 包装为一个 <code class="docutils literal notranslate"><span class="pre">OpenFlags</span></code> 结构体，可以从它的 <code class="docutils literal notranslate"><span class="pre">bits</span></code> 字段获得 <code class="docutils literal notranslate"><span class="pre">u32</span></code> 表示。</p>
 </div>
 <div class="section" id="id5">
-<h3>文件的顺序读写<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
-<p>在打开一个文件之后，我们就可以用之前的 <code class="docutils literal notranslate"><span class="pre">sys_read/sys_write</span></code> 两个系统调用来对它进行读写了。需要注意的是，常规文件的读写模式和之前介绍过的几种文件有所不同。标准输入输出和匿名管道都属于一种流式读写，而常规文件则是顺序读写和随机读写的结合。由于常规文件可以看成一段字节序列，我们应该能够随意读写它的任一段区间的数据，即随机读写。然而用户仅仅通过 <code class="docutils literal notranslate"><span class="pre">sys_read/sys_write</span></code> 两个系统调用不能做到这一点。</p>
-<p>事实上，进程为每个它打开的常规文件维护了一个偏移量，在刚打开时初始值一般为 0 字节。当 <code class="docutils literal notranslate"><span class="pre">sys_read/sys_write</span></code> 的时候，将会从文件字节序列偏移量的位置开始 <strong>顺序</strong> 把数据读到应用缓冲区/从应用缓冲区写入数据。操作完成之后，偏移量向后移动读取/写入的实际字节数。这意味着，下次 <code class="docutils literal notranslate"><span class="pre">sys_read/sys_write</span></code> 将会从刚刚读取/写入之后的位置继续。如果仅使用 <code class="docutils literal notranslate"><span class="pre">sys_read/sys_write</span></code> 的话，则只能从头到尾顺序对文件进行读写。当我们需要从头开始重新写入或读取的话，只能通过 <code class="docutils literal notranslate"><span class="pre">sys_close</span></code> 关闭并重新打开文件来将偏移量重置为 0。为了解决这种问题，有另一个系统调用 <code class="docutils literal notranslate"><span class="pre">sys_lseek</span></code> 可以调整进程打开的一个常规文件的偏移量，这样便能对文件进行随机读写。在本教程中并未实现这个系统调用，因为顺序文件读写就已经足够了。顺带一提，在文件系统的底层实现中都是对文件进行随机读写的。</p>
-<p id="filetest-simple">下面我们从本章的测试用例 <code class="docutils literal notranslate"><span class="pre">filetest_simple</span></code> 来介绍文件系统接口的使用方法：</p>
+<h3>顺序读写文件<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<p>在打开一个文件之后，我们就可以用之前的 <code class="docutils literal notranslate"><span class="pre">sys_read/sys_write</span></code> 两个系统调用来对它进行读写了。本教程只实现文件的顺序读写，而不考虑随机读写。</p>
+<p>以本章的测试用例 <code class="docutils literal notranslate"><span class="pre">filetest_simple</span></code> 来介绍文件系统接口的使用方法：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// user/src/bin/filetest_simple.rs</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="cp">#![no_std]</span><span class="w"></span>
@@ -391,9 +380,8 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>第 20~25 行，我们打开文件 <code class="docutils literal notranslate"><span class="pre">filea</span></code> ，向其中写入字符串 <code class="docutils literal notranslate"><span class="pre">Hello,</span> <span class="pre">world!</span></code> 而后关闭文件。这里需要注意的是我们需要为字符串字面量手动加上 <code class="docutils literal notranslate"><span class="pre">\0</span></code> 作为结尾。在打开文件时 <em>CREATE</em> 标志使得如果 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 原本不存在，文件系统会自动创建一个同名文件，如果已经存在的话则会清空它的内容。而 <em>WRONLY</em> 使得此次只能写入该文件而不能读取。</p></li>
-<li><p>第 27~32 行，我们以只读 <em>RDONLY</em> 的方式将文件 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 的内容读取到缓冲区 <code class="docutils literal notranslate"><span class="pre">buffer</span></code> 中。注意我们很清楚 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 的总大小不超过缓冲区的大小，因此通过单次 <code class="docutils literal notranslate"><span class="pre">read</span></code> 即可将 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 的内容全部读取出来。而更常见的情况是需要进行多次 <code class="docutils literal notranslate"><span class="pre">read</span></code> 直到它的返回值为 0 才能确认文件的内容已被读取完毕了。</p></li>
-<li><p>最后的第 34~38 行我们确认从 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 读取到的内容和之前写入的一致，则测试通过。</p></li>
+<li><p>第 20~25 行，我们以 <em>只写 + 创建</em> 的模式打开文件 <code class="docutils literal notranslate"><span class="pre">filea</span></code> ，向其中写入字符串 <code class="docutils literal notranslate"><span class="pre">Hello,</span> <span class="pre">world!</span></code> 而后关闭文件。</p></li>
+<li><p>第 27~32 行，我们以只读 的方式将文件 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 的内容读取到缓冲区 <code class="docutils literal notranslate"><span class="pre">buffer</span></code> 中。 <code class="docutils literal notranslate"><span class="pre">filea</span></code> 的总大小不超过缓冲区的大小，因此通过单次 <code class="docutils literal notranslate"><span class="pre">read</span></code> 即可将内容全部读出来而更常见的情况是需要进行多次 <code class="docutils literal notranslate"><span class="pre">read</span></code> ，直到返回值为 0 才能确认文件已被读取完毕。</p></li>
 </ul>
 </div>
 </div>
@@ -403,12 +391,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="2fs-implementation.html">
+          <a class="next-page" href="2fs-implementation-1.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">简易文件系统 easy-fs</div>
+                <div class="title">简易文件系统 easy-fs (上)</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -456,8 +444,8 @@
 <li><a class="reference internal" href="#">文件系统接口</a><ul>
 <li><a class="reference internal" href="#id2">简易文件与目录抽象</a></li>
 <li><a class="reference internal" href="#id3">打开与读写文件的系统调用</a><ul>
-<li><a class="reference internal" href="#id4">文件打开</a></li>
-<li><a class="reference internal" href="#id5">文件的顺序读写</a></li>
+<li><a class="reference internal" href="#id4">打开文件</a></li>
+<li><a class="reference internal" href="#id5">顺序读写文件</a></li>
 </ul>
 </li>
 </ul>

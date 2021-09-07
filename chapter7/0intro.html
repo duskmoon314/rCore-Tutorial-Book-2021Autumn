@@ -224,7 +224,8 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">第七章：文件系统与I/O重定向</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">引言</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1fs-interface.html">文件系统接口</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2fs-implementation.html">简易文件系统 easy-fs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2fs-implementation-1.html">简易文件系统 easy-fs (上)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2fs-implementation-2.html">简易文件系统 easy-fs (下)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3using-easy-fs-in-kernel.html">在内核中使用 easy-fs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4cmdargs-and-redirection.html">命令行参数与标准 I/O 重定向</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5exercise.html">chapter7练习</a></li>
@@ -287,6 +288,7 @@
 <h2>本章导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>本章我们将实现一个简单的文件系统 – easyfs，能够对 <strong>持久存储设备</strong> (Persistent Storage) I/O 资源进行管理；将设计两种文件：常规文件和目录文件，它们均以文件系统所维护的 <strong>磁盘文件</strong> 形式被组织并保存在持久存储设备上。</p>
 <p>我们还将扩展 <code class="docutils literal notranslate"><span class="pre">exec</span></code> 系统调用，使之能传递运行参数，并进一步改进 shell 程序，使其支持重定向符号 <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> 和 <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> 。</p>
+<p>本章的篇幅与第四章接近。</p>
 </div>
 <div class="section" id="id3">
 <h2>实践体验<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
