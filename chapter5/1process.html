@@ -291,7 +291,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 <p>借助这三个重要系统调用，我们可以开发功能更强大的应用。下面是两个案例： <strong>用户初始程序-init</strong> 和 <strong>shell程序-user_shell</strong> 。</p>
 <div class="section" id="initproc">
 <h3>用户初始程序-initproc<a class="headerlink" href="#initproc" title="永久链接至标题">¶</a></h3>
-<p>在内核初始化完毕后创建的第一个进程，是 <strong>用户初始进程</strong> (Initial Process) ，它将通过 <code class="docutils literal notranslate"><span class="pre">fork+exec</span></code> 创建 <code class="docutils literal notranslate"><span class="pre">user_shell</span></code> 子进程。初始进程存在的意义是回收僵尸进程。</p>
+<p>在内核初始化完毕后创建的第一个进程，是 <strong>用户初始进程</strong> (Initial Process) ，它将通过 <code class="docutils literal notranslate"><span class="pre">fork+exec</span></code> 创建 <code class="docutils literal notranslate"><span class="pre">user_shell</span></code> 子进程，并将被用于回收僵尸进程。</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// user/src/bin/initproc.rs</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="cp">#![no_std]</span><span class="w"></span>
