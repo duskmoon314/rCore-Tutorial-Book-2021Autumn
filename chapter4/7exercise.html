@@ -294,7 +294,7 @@
 <li><p>syscall ID：222</p></li>
 <li><p>C接口： <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">mmap(void*</span> <span class="pre">start,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">long</span> <span class="pre">len,</span> <span class="pre">int</span> <span class="pre">port)</span></code></p></li>
 <li><p>Rust接口： <code class="docutils literal notranslate"><span class="pre">fn</span> <span class="pre">mmap(start:</span> <span class="pre">usize,</span> <span class="pre">len:</span> <span class="pre">usize,</span> <span class="pre">port:</span> <span class="pre">usize)</span> <span class="pre">-&gt;</span> <span class="pre">i32</span></code></p></li>
-<li><p>功能：申请长度为 len 字节的物理内存（不要求实际物理内存位置，可以随便找一块），并映射到 addr 开始的虚存，内存页属性为 port。</p></li>
+<li><p>功能：申请长度为 len 字节的物理内存（不要求实际物理内存位置，可以随便找一块），并映射到 start 开始的虚存，内存页属性为 port。</p></li>
 <li><dl class="simple">
 <dt>参数：</dt><dd><ul>
 <li><p>start：需要映射的虚存起始地址。</p></li>

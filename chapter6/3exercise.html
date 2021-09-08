@@ -283,30 +283,100 @@
 <div class="section" id="id1">
 <h2>编程作业<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <div class="section" id="id2">
-<h3>实验要求<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<h3>共享内存<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<p>文档中花了大量篇幅描述文件以及管道机制，此外共享内存也是一种常用的进程间通信机制。请你在 ch4 的基础上，利用 ch6 新增加或修改的接口，修改 mmap 实现共享内存的申请。</p>
+<p>mmap 系统调用新定义：</p>
+<ul class="simple">
+<li><p>syscall ID: 222</p></li>
+<li><p>C接口：<code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">mmap(void*</span> <span class="pre">start,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">long</span> <span class="pre">len,</span> <span class="pre">int</span> <span class="pre">port,</span> <span class="pre">int</span> <span class="pre">flag,</span> <span class="pre">int</span> <span class="pre">fd)</span></code></p></li>
+<li><p>Rust 接口：<code class="docutils literal notranslate"><span class="pre">fn</span> <span class="pre">mmap(start:</span> <span class="pre">usize,</span> <span class="pre">len:</span> <span class="pre">usize,</span> <span class="pre">prot:</span> <span class="pre">usize,</span> <span class="pre">flag:</span> <span class="pre">usize,</span> <span class="pre">fd:</span> <span class="pre">usize)</span> <span class="pre">-&gt;</span> <span class="pre">i32</span></code></p></li>
+<li><p>功能：当 flag 等于 0 时，fd 被忽略，逻辑与 ch4 时一致；当 flag 不等于 0 时，视为申请共享内存（可类比 posix 接口的 MAP_SHARED 标志），这时需要根据 fd （实际是内核记录的一段共享内存所用物理内存的 id）将对应的物理内存映射到 start 开始的虚存，内存页的属性为 prot。当 fd 为 0 时，视为需要申请一段新的物理内存作为共享内存使用。</p></li>
+<li><dl class="simple">
+<dt>参数：</dt><dd><ul>
+<li><p>start：需要映射的虚存起始地址。</p></li>
+<li><p>len：映射字节长度，可以为 0 （如果是则直接返回），不可过大 (上限 1GiB )。</p></li>
+<li><p>port：第 0 位表示是否可读，第 1 位表示是否可写，第 2 位表示是否可执行。其他位无效（必须为 0 ）。</p></li>
+<li><p>flag：申请内存的模式，为 0 时为申请物理内存，不为 0 时为申请共享内存。</p></li>
+<li><p>fd：申请共享内存时使用，表示内核记录的一段共享内存的 id。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>说明：</dt><dd><ul>
+<li><p>我们尚未有文件系统，所以这只是一个看上去像 posix 的 mmap 但实际不是的系统调用。</p></li>
+<li><p>内核在 <code class="docutils literal notranslate"><span class="pre">mm/memory_set.rs</span></code> 中添加了 <code class="docutils literal notranslate"><span class="pre">SharedMemory</span></code> 等结构，用于记录已经分配给共享内存使用。可以理解为有一个表，记录 (shared_memory_id, physical_frames)。通过本次实验等测例，应该不需要修改相关结构，需要用到的接口已经在 MapArea 中实现。</p></li>
+<li><p>申请共享内存时，正确时返回 shared_memory_id，错误返回 -1。即尝试申请新的共享内存时，返回新分配的 id；尝试将已经存在的共享内存分配给某地址时，返回传进去的 id。</p></li>
+<li><p>为了简单，addr 要求按页对齐(否则报错)，len 可直接按页上取整。</p></li>
+<li><p>为了简单，不考虑分配失败时的页回收（也就是内存泄漏）。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>错误：</dt><dd><ul>
+<li><p>[addr, addr + len) 存在已经被映射的页。</p></li>
+<li><p>物理内存不足。</p></li>
+<li><p>port &amp; !0x7 != 0 (port 其余位必须为0)。</p></li>
+<li><p>port &amp; 0x7 = 0 (这样的内存无意义)。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>munmap 系统调用定义：</p>
+<ul class="simple">
+<li><p>syscall ID：215</p></li>
+<li><p>C接口： <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">munmap(void*</span> <span class="pre">start,</span> <span class="pre">unsigned</span> <span class="pre">long</span> <span class="pre">long</span> <span class="pre">len)</span></code></p></li>
+<li><p>Rust接口： <code class="docutils literal notranslate"><span class="pre">fn</span> <span class="pre">munmap(start:</span> <span class="pre">usize,</span> <span class="pre">len:</span> <span class="pre">usize)</span> <span class="pre">-&gt;</span> <span class="pre">i32</span></code></p></li>
+<li><p>功能：取消一块虚存的映射。</p></li>
+<li><p>参数：同 mmap</p></li>
+<li><dl class="simple">
+<dt>说明：</dt><dd><ul>
+<li><p>为了简单，参数错误时不考虑内存的恢复和回收。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>错误：</dt><dd><ul>
+<li><p>[start, start + len) 中存在未被映射的虚存。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>提示：</p>
+<ul class="simple">
+<li><p>请回顾 ch4 中实现 mmap 和 munmap 时修改或新增的函数，其中绝大部分在本次实验中需要增加传递的参数或调整函数位置（ch5 增加了进程相关的信息，许多函数都调整了位置），务必先浏览一下 ch5 和 ch6 新增的代码再将你在 ch4 中的实现 merge 或其他方法合并入 ch6 的实验框架。</p></li>
+<li><p>本次实验接口已基本给出，实验内容与 ch4 非常相似，通过测例即算完成实验。</p></li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h3>实验要求<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>实现分支：ch6。</p></li>
-<li><p>通过所有测例。</p></li>
+<li><p>修改 mmap 和 munmap 两个系统调用，并通过所有测例。</p></li>
 </ul>
 <p>进入 Shell 后，输入 <code class="docutils literal notranslate"><span class="pre">test_usertest</span></code> 进行测试。</p>
 </div>
-<div class="section" id="id3">
-<h3>实验检查<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id4">
+<h3>实验检查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>实验目录要求同 ch3</p></li>
 </ul>
 </div>
 </div>
-<div class="section" id="id4">
-<h2>问答作业<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id5">
+<h2>问答作业<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ol class="arabic simple">
 <li><p>fork + exec 的一个比较大的问题是 fork 之后的内存页/文件等资源完全没有使用就废弃了，针对这一点，有什么改进策略？</p></li>
 <li><p>其实使用了题(1)的策略之后，fork + exec 所带来的无效资源的问题已经基本被解决了，但是今年来 fork 还是在被不断的批判，那么到底是什么正在”杀死”fork？可以参考 <a class="reference external" href="https://www.microsoft.com/en-us/research/uploads/prod/2019/04/fork-hotos19.pdf">论文</a> ，<strong>注意</strong>：回答无明显错误就给满分，出这题只是想引发大家的思考，完全不要求看论文，球球了，别卷了。</p></li>
 <li><p>举出使用 pipe 的一个实际应用的例子。</p></li>
 </ol>
 </div>
-<div class="section" id="id6">
-<h2>报告要求<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id7">
+<h2>报告要求<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>简单总结你实现的功能（200字以内，不要贴代码）。</p></li>
 <li><p>完成问答题。</p></li>
@@ -371,12 +441,13 @@
             <ul>
 <li><a class="reference internal" href="#">chapter6练习</a><ul>
 <li><a class="reference internal" href="#id1">编程作业</a><ul>
-<li><a class="reference internal" href="#id2">实验要求</a></li>
-<li><a class="reference internal" href="#id3">实验检查</a></li>
+<li><a class="reference internal" href="#id2">共享内存</a></li>
+<li><a class="reference internal" href="#id3">实验要求</a></li>
+<li><a class="reference internal" href="#id4">实验检查</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id4">问答作业</a></li>
-<li><a class="reference internal" href="#id6">报告要求</a></li>
+<li><a class="reference internal" href="#id5">问答作业</a></li>
+<li><a class="reference internal" href="#id7">报告要求</a></li>
 </ul>
 </li>
 </ul>
