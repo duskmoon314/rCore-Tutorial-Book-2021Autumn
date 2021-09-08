@@ -371,7 +371,8 @@
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p><code class="docutils literal notranslate"><span class="pre">UPSafeCell</span></code> 实现在 <code class="docutils literal notranslate"><span class="pre">sync</span></code> 模块中，调用 <code class="docutils literal notranslate"><span class="pre">exclusive_access</span></code> 方法能获取其内部对象的可变引用，
-如果程序运行中同时存在多个这样的引用，会触发 <code class="docutils literal notranslate"><span class="pre">already</span> <span class="pre">borrowed:</span> <span class="pre">BorrowMutError</span></code></p>
+如果程序运行中同时存在多个这样的引用，会触发 <code class="docutils literal notranslate"><span class="pre">already</span> <span class="pre">borrowed:</span> <span class="pre">BorrowMutError</span></code>。</p>
+<p><code class="docutils literal notranslate"><span class="pre">UPSafeCell</span></code> 既提供了内部可变性，又在单核情境下防止了内部对象被重复借用，我们将在后文中多次见到它。</p>
 </div>
 <p>这里使用了外部库 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 提供的 <code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏。</p>
 <p><code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏提供了全局变量的运行时初始化功能。一般情况下，全局变量必须在编译期设置初始值，
