@@ -280,15 +280,11 @@
         </div>
         <div class="section" id="id1">
 <h1>内核与应用的地址空间<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>本节我们就在内核中通过基于页表的各种数据结构实现地址空间的抽象。</p>
 <div class="section" id="id2">
-<h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>页表 <code class="docutils literal notranslate"><span class="pre">PageTable</span></code> 只能以页为单位帮助我们维护一个虚拟内存到物理内存的地址转换关系，它本身对于计算机系统的整个虚拟/物理内存空间并没有一个全局的描述和掌控。操作系统通过不同页表的管理，来完成对不同应用和操作系统自身所在的虚拟内存，以及虚拟内存与物理内存映射关系的全面管理。这种管理是建立在地址空间的抽象上的。本节
-我们就在内核中通过基于页表的各种数据结构实现地址空间的抽象，并介绍内核和应用的虚拟和物理地址空间中各需要包含哪些内容。</p>
-</div>
+<h2>实现地址空间抽象<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <div class="section" id="id3">
-<h2>实现地址空间抽象<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<div class="section" id="id4">
-<h3>逻辑段：一段连续地址的虚拟内存<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<h3>逻辑段：一段连续地址的虚拟内存<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <p>我们以逻辑段 <code class="docutils literal notranslate"><span class="pre">MapArea</span></code> 为单位描述一段连续地址的虚拟内存。所谓逻辑段，就是指地址区间中的一段实际可用（即 MMU 通过查多级页表
 可以正确完成地址转换）的地址连续的虚拟地址区间，该区间内包含的所有虚拟页面都以一种相同的方式映射到物理页帧，具有可读/可写/可执行等属性。</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/mm/memory_set.rs</span>
@@ -339,8 +335,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h3>地址空间：一系列有关联的逻辑段<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id4">
+<h3>地址空间：一系列有关联的逻辑段<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <p>地址空间是一系列有关联的逻辑段，这种关联一般是指这些逻辑段属于一个运行的程序（目前把一个运行的程序称为任务，后续会称为进程）。用来表明正在运行的应用所在执行环境中的可访问内存空间，在这个内存空间中，包含了一系列的不一定连续的逻辑段。这样我们就有任务的地址空间，内核的地址空间等说法了。地址空间使用 <code class="docutils literal notranslate"><span class="pre">MemorySet</span></code> 类型来表示：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/mm/memory_set.rs</span>
 
@@ -523,8 +519,8 @@
 </ul>
 </div>
 </div>
-<div class="section" id="id6">
-<h2>内核地址空间<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id5">
+<h2>内核地址空间<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p id="term-isolation">在本章之前，内核和应用代码的访存地址都被视为一个物理地址直接访问物理内存，而在分页模式开启之后，它们都需要通过 MMU 的
 地址转换变成物理地址再交给 CPU 的访存单元去访问物理内存。地址空间抽象的重要意义在于 <strong>隔离</strong> (Isolation) ，当我们
 在执行每个应用的代码的时候，内核需要控制 MMU 使用这个应用地址空间的多级页表进行地址转换。由于每个应用地址空间在创建
@@ -631,8 +627,8 @@ CPU 处于内核态访问，且只能读或写。</p>
 依次创建 5 个逻辑段并通过 <code class="docutils literal notranslate"><span class="pre">push</span></code> 方法将它们插入到内核地址空间中，上面我们已经详细介绍过这 5 个逻辑段。跳板
 是通过 <code class="docutils literal notranslate"><span class="pre">map_trampoline</span></code> 方法来映射的，我们也将在本章最后一节进行讲解。</p>
 </div>
-<div class="section" id="id7">
-<h2>应用地址空间<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id6">
+<h2>应用地址空间<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>现在我们来介绍如何创建应用的地址空间。在前面的章节中，我们直接将丢弃所有符号的应用二进制镜像链接到内核，在初始化的时候
 内核仅需将他们加载到正确的初始物理地址就能使它们正确执行。但本章中，我们希望效仿内核地址空间的设计，同样借助页表机制
 使得应用地址空间的各个逻辑段也可以有不同的访问方式限制，这样可以提早检测出应用的错误并及时将其终止以最小化它对系统带来的
@@ -858,14 +854,13 @@ program header 数据被存放的位置可以通过 <code class="docutils litera
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">内核与应用的地址空间</a><ul>
-<li><a class="reference internal" href="#id2">本节导读</a></li>
-<li><a class="reference internal" href="#id3">实现地址空间抽象</a><ul>
-<li><a class="reference internal" href="#id4">逻辑段：一段连续地址的虚拟内存</a></li>
-<li><a class="reference internal" href="#id5">地址空间：一系列有关联的逻辑段</a></li>
+<li><a class="reference internal" href="#id2">实现地址空间抽象</a><ul>
+<li><a class="reference internal" href="#id3">逻辑段：一段连续地址的虚拟内存</a></li>
+<li><a class="reference internal" href="#id4">地址空间：一系列有关联的逻辑段</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id6">内核地址空间</a></li>
-<li><a class="reference internal" href="#id7">应用地址空间</a></li>
+<li><a class="reference internal" href="#id5">内核地址空间</a></li>
+<li><a class="reference internal" href="#id6">应用地址空间</a></li>
 </ul>
 </li>
 </ul>

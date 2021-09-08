@@ -510,21 +510,12 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
 <span class="linenos"> 7</span><span class="nf">run</span><span class="o">:</span> <span class="n">run</span>-<span class="n">inner</span>
 <span class="linenos"> 8</span>
 <span class="linenos"> 9</span><span class="nf">run-inner</span><span class="o">:</span> <span class="n">build</span>
-<span class="linenos">10</span><span class="cp">ifeq ($(BOARD),qemu)</span>
-<span class="hll"><span class="linenos">11</span>   @qemu-system-riscv64 <span class="se">\</span>
-</span><span class="hll"><span class="linenos">12</span>      -machine virt <span class="se">\</span>
-</span><span class="hll"><span class="linenos">13</span>      -nographic <span class="se">\</span>
-</span><span class="hll"><span class="linenos">14</span>      -bios <span class="k">$(</span>BOOTLOADER<span class="k">)</span> <span class="se">\</span>
-</span><span class="hll"><span class="linenos">15</span>      -device loader,file<span class="o">=</span><span class="k">$(</span>KERNEL_BIN<span class="k">)</span>,addr<span class="o">=</span><span class="k">$(</span>KERNEL_ENTRY_PA<span class="k">)</span>
-</span><span class="linenos">16</span><span class="cp">else</span>
-<span class="linenos">17</span>   @cp <span class="k">$(</span>BOOTLOADER<span class="k">)</span> <span class="k">$(</span>BOOTLOADER<span class="k">)</span>.copy
-<span class="linenos">18</span>   @dd <span class="k">if</span><span class="o">=</span><span class="k">$(</span>KERNEL_BIN<span class="k">)</span> <span class="nv">of</span><span class="o">=</span><span class="k">$(</span>BOOTLOADER<span class="k">)</span>.copy <span class="nv">bs</span><span class="o">=</span>128K <span class="nv">seek</span><span class="o">=</span><span class="m">1</span>
-<span class="linenos">19</span>   @mv <span class="k">$(</span>BOOTLOADER<span class="k">)</span>.copy <span class="k">$(</span>KERNEL_BIN<span class="k">)</span>
-<span class="linenos">20</span>   @sudo chmod <span class="m">777</span> <span class="k">$(</span>K210-SERIALPORT<span class="k">)</span>
-<span class="linenos">21</span>   python3 <span class="k">$(</span>K210-BURNER<span class="k">)</span> -p <span class="k">$(</span>K210-SERIALPORT<span class="k">)</span> -b <span class="m">1500000</span> <span class="k">$(</span>KERNEL_BIN<span class="k">)</span>
-<span class="linenos">22</span>   miniterm --eol LF --dtr <span class="m">0</span> --rts <span class="m">0</span> --filter direct <span class="k">$(</span>K210-SERIALPORT<span class="k">)</span> <span class="m">115200</span>
-<span class="linenos">23</span><span class="cp">endif</span>
-</pre></div>
+<span class="linenos">10</span>   @qemu-system-riscv64 <span class="se">\</span>
+<span class="hll"><span class="linenos">11</span>      -machine virt <span class="se">\</span>
+</span><span class="hll"><span class="linenos">12</span>      -nographic <span class="se">\</span>
+</span><span class="hll"><span class="linenos">13</span>      -bios <span class="k">$(</span>BOOTLOADER<span class="k">)</span> <span class="se">\</span>
+</span><span class="hll"><span class="linenos">14</span>      -device loader,file<span class="o">=</span><span class="k">$(</span>KERNEL_BIN<span class="k">)</span>,addr<span class="o">=</span><span class="k">$(</span>KERNEL_ENTRY_PA<span class="k">)</span>
+</span></pre></div>
 </div>
 </div>
 <div class="section" id="id2">
@@ -541,41 +532,6 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
 <p><strong>FIXME：使用 GDB 跟踪 qemu 的运行状态</strong></p>
 </div>
 </div>
-</div>
-<div class="section" id="k210">
-<h2>k210 平台上可执行文件和二进制镜像的生成流程<a class="headerlink" href="#k210" title="永久链接至标题">¶</a></h2>
-<p>对于 k210 平台来说，只需要将 maix 系列开发板通过数据线连接到 PC，然后 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">BOARD=k210</span></code> 即可。从 Makefile 中来看：</p>
-<div class="highlight-makefile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nv">K210-SERIALPORT</span>      <span class="o">=</span> /dev/ttyUSB0
-<span class="linenos"> 2</span><span class="nv">K210-BURNER</span>          <span class="o">=</span> ../tools/kflash.py
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="nf">run-inner</span><span class="o">:</span> <span class="n">build</span>
-<span class="linenos"> 5</span><span class="cp">ifeq ($(BOARD),qemu)</span>
-<span class="linenos"> 6</span>   @qemu-system-riscv64 <span class="se">\</span>
-<span class="linenos"> 7</span>      -machine virt <span class="se">\</span>
-<span class="linenos"> 8</span>      -nographic <span class="se">\</span>
-<span class="linenos"> 9</span>      -bios <span class="k">$(</span>BOOTLOADER<span class="k">)</span> <span class="se">\</span>
-<span class="linenos">10</span>      -device loader,file<span class="o">=</span><span class="k">$(</span>KERNEL_BIN<span class="k">)</span>,addr<span class="o">=</span><span class="k">$(</span>KERNEL_ENTRY_PA<span class="k">)</span>
-<span class="linenos">11</span><span class="cp">else</span>
-<span class="linenos">12</span>   @cp <span class="k">$(</span>BOOTLOADER<span class="k">)</span> <span class="k">$(</span>BOOTLOADER<span class="k">)</span>.copy
-<span class="hll"><span class="linenos">13</span>   @dd <span class="k">if</span><span class="o">=</span><span class="k">$(</span>KERNEL_BIN<span class="k">)</span> <span class="nv">of</span><span class="o">=</span><span class="k">$(</span>BOOTLOADER<span class="k">)</span>.copy <span class="nv">bs</span><span class="o">=</span>128K <span class="nv">seek</span><span class="o">=</span><span class="m">1</span>
-</span><span class="linenos">14</span>   @mv <span class="k">$(</span>BOOTLOADER<span class="k">)</span>.copy <span class="k">$(</span>KERNEL_BIN<span class="k">)</span>
-<span class="linenos">15</span>   @sudo chmod <span class="m">777</span> <span class="k">$(</span>K210-SERIALPORT<span class="k">)</span>
-<span class="hll"><span class="linenos">16</span>   python3 <span class="k">$(</span>K210-BURNER<span class="k">)</span> -p <span class="k">$(</span>K210-SERIALPORT<span class="k">)</span> -b <span class="m">1500000</span> <span class="k">$(</span>KERNEL_BIN<span class="k">)</span>
-</span><span class="hll"><span class="linenos">17</span>   miniterm --eol LF --dtr <span class="m">0</span> --rts <span class="m">0</span> --filter direct <span class="k">$(</span>K210-SERIALPORT<span class="k">)</span> <span class="m">115200</span>
-</span><span class="linenos">18</span><span class="cp">endif</span>
-</pre></div>
-</div>
-<p>在构建目标 <code class="docutils literal notranslate"><span class="pre">run-inner</span></code> 的时候，根据平台 <code class="docutils literal notranslate"><span class="pre">BOARD</span></code> 的不同，启动运行的指令也不同。当我们传入命令行参数 <code class="docutils literal notranslate"><span class="pre">BOARD=k210</span></code> 时，就会进入下面
-的分支。</p>
-<ul class="simple">
-<li><p>第 13 行我们使用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 工具将 bootloader 和二进制镜像拼接到一起，这是因为 k210 平台的写入工具每次只支持写入一个文件，所以我们只能
-将二者合并到一起一并写入 k210 的内存上。这样的参数设置可以保证 bootloader 在合并后文件的开头，而二进制镜像在文件偏移量 0x20000 的
-位置处。有兴趣的读者可以输入命令 <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">dd</span></code> 查看关于工具 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 的更多信息。</p></li>
-<li><p>第 16 行我们使用烧写工具 <code class="docutils literal notranslate"><span class="pre">K210-BURNER</span></code> 将合并后的镜像烧写到 k210 开发板的内存的 <code class="docutils literal notranslate"><span class="pre">0x80000000</span></code> 地址上。
-参数 <code class="docutils literal notranslate"><span class="pre">K210-SERIALPORT</span></code> 表示当前 OS 识别到的 k210 开发板的串口设备名。在 Ubuntu 平台上一般为 <code class="docutils literal notranslate"><span class="pre">/dev/ttyUSB0</span></code>。</p></li>
-<li><p>第 17 行我们打开串口终端和 k210 开发板进行通信，可以通过键盘向 k210 开发板发送字符并在屏幕上看到 k210 开发板的字符输出。</p></li>
-</ul>
-<p>可以输入 Ctrl+] 退出 miniterm。</p>
 </div>
 <div class="section" id="id3">
 <h2>其他工具和文件格式说明的参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
@@ -652,7 +608,6 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
 <li><a class="reference internal" href="#id2">qemu</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#k210">k210 平台上可执行文件和二进制镜像的生成流程</a></li>
 <li><a class="reference internal" href="#id3">其他工具和文件格式说明的参考</a></li>
 </ul>
 </li>

@@ -280,31 +280,28 @@
         </div>
         <div class="section" id="id1">
 <h1>基于地址空间的分时多任务<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>本节我们介绍如何基于地址空间抽象来实现第三章的分时多任务系统。</p>
 <div class="section" id="id2">
-<h2>本节导读<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>本节我们介绍如何基于地址空间抽象而不是对于物理内存的直接访问来实现第三章的分时多任务系统。这样，我们的应用编写会更加方便，与操作系统的关联也松耦合一些，操作系统自身的安全性也得到了加强。</p>
-</div>
-<div class="section" id="id3">
-<h2>建立并开启基于分页模式的虚拟地址空间<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>建立并开启基于分页模式的虚拟地址空间<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>当 SBI 实现（本项目中基于 RustSBI）初始化完成后， CPU 将跳转到内核入口点并在 S 特权级上执行，此时还并没有开启分页模式
 ，内核的每一次访存仍被视为一个物理地址直接访问物理内存。而在开启分页模式之后，内核的代码在访存的时候只能看到内核地址空间，
 此时每次访存将被视为一个虚拟地址且需要通过 MMU 基于内核地址空间的多级页表的地址转换。这两种模式之间的过渡在内核初始化期间
 完成。</p>
-<div class="section" id="id4">
-<h3>创建内核地址空间<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id3">
+<h3>创建内核地址空间<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <p>我们创建内核地址空间的全局实例：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/mm/memory_set.rs</span>
 
 <span class="n">lazy_static</span><span class="o">!</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">ref</span><span class="w"> </span><span class="n">KERNEL_SPACE</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="n">MemorySet</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="w"></span>
-<span class="w">        </span><span class="n">MemorySet</span>::<span class="n">new_kernel</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">ref</span><span class="w"> </span><span class="n">KERNEL_SPACE</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">UPSafeCell</span><span class="o">&lt;</span><span class="n">MemorySet</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">UPSafeCell</span>::<span class="n">new</span><span class="p">(</span><span class="n">MemorySet</span>::<span class="n">new_kernel</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">)});</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>从之前对于 <code class="docutils literal notranslate"><span class="pre">lazy_static!</span></code> 宏的介绍可知， <code class="docutils literal notranslate"><span class="pre">KERNEL_SPACE</span></code> 在运行期间它第一次被用到时才会实际进行初始化，而它所
-占据的空间则是编译期被放在全局数据段中。这里使用经典的 <code class="docutils literal notranslate"><span class="pre">Arc&lt;Mutex&lt;T&gt;&gt;</span></code> 组合是因为我们既需要 <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code> 提供的共享
-引用，也需要 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 提供的互斥访问。在多核环境下才能体现出它的全部能力，目前在单核环境下主要是为了通过编译器检查。</p>
+占据的空间则是编译期被放在全局数据段中。 <code class="docutils literal notranslate"><span class="pre">Arc&lt;UPSafeCell&lt;_&gt;&gt;</span></code> 同时带来 <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code> 提供的共享
+引用，和 <code class="docutils literal notranslate"><span class="pre">UPSafeCell&lt;T&gt;</span></code> 提供的互斥访问。</p>
 <p>在 <code class="docutils literal notranslate"><span class="pre">rust_main</span></code> 函数中，我们首先调用 <code class="docutils literal notranslate"><span class="pre">mm::init</span></code> 进行内存管理子系统的初始化：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/mm/mod.rs</span>
 
@@ -313,7 +310,7 @@
 <span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">init</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">heap_allocator</span>::<span class="n">init_heap</span><span class="p">();</span><span class="w"></span>
 <span class="w">    </span><span class="n">frame_allocator</span>::<span class="n">init_frame_allocator</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">activate</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">exclusive_access</span><span class="p">().</span><span class="n">activate</span><span class="p">();</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
@@ -322,20 +319,8 @@
 MMU 在地址转换的时候使用内核的多级页表，这一切均在一行之内做到：</p>
 <ul>
 <li><p>首先，我们引用 <code class="docutils literal notranslate"><span class="pre">KERNEL_SPACE</span></code> ，这是它第一次被使用，就在此时它会被初始化，调用 <code class="docutils literal notranslate"><span class="pre">MemorySet::new_kernel</span></code>
-创建一个内核地址空间并使用 <code class="docutils literal notranslate"><span class="pre">Arc&lt;Mutex&lt;T&gt;&gt;</span></code> 包裹起来；</p></li>
-<li><p>接着使用 <code class="docutils literal notranslate"><span class="pre">.lock()</span></code> 获取一个可变引用 <code class="docutils literal notranslate"><span class="pre">&amp;mut</span> <span class="pre">MemorySet</span></code> 。需要注意的是这里发生了两次隐式类型转换：</p>
-<ol class="arabic simple">
-<li><p>我们知道
-<code class="docutils literal notranslate"><span class="pre">lock</span></code> 是 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;</span></code> 的方法而不是 <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code> 的方法，由于 <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code> 实现了 <code class="docutils literal notranslate"><span class="pre">Deref</span></code> Trait ，当
-<code class="docutils literal notranslate"><span class="pre">lock</span></code> 需要一个 <code class="docutils literal notranslate"><span class="pre">&amp;Mutex&lt;T&gt;</span></code> 类型的参数的时候，编译器会自动将传入的 <code class="docutils literal notranslate"><span class="pre">&amp;Arc&lt;Mutex&lt;T&gt;&gt;</span></code> 转换为
-<code class="docutils literal notranslate"><span class="pre">&amp;Mutex&lt;T&gt;</span></code> 这样就实现了类型匹配；</p></li>
-<li><p>事实上 <code class="docutils literal notranslate"><span class="pre">Mutex&lt;T&gt;::lock</span></code> 返回的是一个 <code class="docutils literal notranslate"><span class="pre">MutexGuard&lt;'a,</span> <span class="pre">T&gt;</span></code> ，这同样是
-RAII 的思想，当这个类型生命周期结束后互斥锁就会被释放。而该类型实现了 <code class="docutils literal notranslate"><span class="pre">DerefMut</span></code> Trait，因此当一个函数接受类型
-为 <code class="docutils literal notranslate"><span class="pre">&amp;mut</span> <span class="pre">T</span></code> 的参数却被传入一个类型为 <code class="docutils literal notranslate"><span class="pre">&amp;mut</span> <span class="pre">MutexGuard&lt;'a,</span> <span class="pre">T&gt;</span></code> 的参数的时候，编译器会自动进行类型转换使
-参数匹配。</p></li>
-</ol>
-</li>
-<li><p>最后，我们调用 <code class="docutils literal notranslate"><span class="pre">MemorySet::activate</span></code> ：</p>
+创建一个内核地址空间并使用 <code class="docutils literal notranslate"><span class="pre">Arc&lt;UPSafeCell&lt;T&gt;&gt;</span></code> 包裹起来；</p></li>
+<li><p>最然后，我们调用 <code class="docutils literal notranslate"><span class="pre">MemorySet::activate</span></code> ：</p>
 <blockquote>
 <div><div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// os/src/mm/page_table.rs</span>
 <span class="linenos"> 2</span>
@@ -350,7 +335,7 @@ RAII 的思想，当这个类型生命周期结束后互斥锁就会被释放。
 <span class="linenos">11</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">satp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">page_table</span><span class="p">.</span><span class="n">token</span><span class="p">();</span><span class="w"></span>
 <span class="linenos">12</span><span class="w">        </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="linenos">13</span><span class="w">            </span><span class="n">satp</span>::<span class="n">write</span><span class="p">(</span><span class="n">satp</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">            </span><span class="fm">llvm_asm!</span><span class="p">(</span><span class="s">"sfence.vma"</span><span class="w"> </span>:::: <span class="s">"volatile"</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">            </span><span class="fm">asm!</span><span class="p">(</span><span class="s">"sfence.vma"</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">15</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
 <span class="linenos">16</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="linenos">17</span><span class="p">}</span><span class="w"></span>
@@ -380,50 +365,13 @@ MMU 仅需单次访存就能找到页表项并完成地址转换，而多级页�
 我们修改了 satp 切换了地址空间，快表中的键值对就会失效，因为它还表示着上个地址空间的映射关系。为了 MMU 的地址转换
 能够及时与 satp 的修改同步，我们可以选择立即使用 <code class="docutils literal notranslate"><span class="pre">sfence.vma</span></code> 指令将快表清空，这样 MMU 就不会看到快表中已经
 过期的键值对了。</p>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p><strong>sfence.vma 是一个屏障</strong></p>
-<p>对于一种仅含有快表的 RISC-V CPU 实现来说，我们可以认为 <code class="docutils literal notranslate"><span class="pre">sfence.vma</span></code> 的作用就是清空快表。事实上它在特权级
-规范中被定义为一种含义更加丰富的内存屏障，具体来说： <code class="docutils literal notranslate"><span class="pre">sfence.vma</span></code> 可以使得所有发生在它后面的地址转换都能够
-看到所有排在它前面的写入操作，在不同的平台上这条指令要做的事情也都是不同的。这条指令还可以被精细配置来减少同步开销，
-详情请参考 RISC-V 特权级规范。</p>
-</div>
-</div>
-<div class="section" id="id5">
-<h3>检查内核地址空间的多级页表设置<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
-<p>调用 <code class="docutils literal notranslate"><span class="pre">mm::init</span></code> 之后我们就使能了内核动态内存分配、物理页帧管理，还启用了分页模式进入了内核地址空间。之后我们可以
-通过 <code class="docutils literal notranslate"><span class="pre">mm::remap_test</span></code> 来检查内核地址空间的多级页表是否被正确设置：</p>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/mm/memory_set.rs</span>
-
-<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">remap_test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">kernel_space</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">lock</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">mid_text</span>: <span class="nc">VirtAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">stext</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">etext</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">).</span><span class="n">into</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">mid_rodata</span>: <span class="nc">VirtAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">srodata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">erodata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">).</span><span class="n">into</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">mid_data</span>: <span class="nc">VirtAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">sdata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">edata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">).</span><span class="n">into</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="fm">assert_eq!</span><span class="p">(</span><span class="w"></span>
-<span class="w">        </span><span class="n">kernel_space</span><span class="p">.</span><span class="n">page_table</span><span class="p">.</span><span class="n">translate</span><span class="p">(</span><span class="n">mid_text</span><span class="p">.</span><span class="n">floor</span><span class="p">()).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">writable</span><span class="p">(),</span><span class="w"></span>
-<span class="w">        </span><span class="kc">false</span><span class="w"></span>
-<span class="w">    </span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="fm">assert_eq!</span><span class="p">(</span><span class="w"></span>
-<span class="w">        </span><span class="n">kernel_space</span><span class="p">.</span><span class="n">page_table</span><span class="p">.</span><span class="n">translate</span><span class="p">(</span><span class="n">mid_rodata</span><span class="p">.</span><span class="n">floor</span><span class="p">()).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">writable</span><span class="p">(),</span><span class="w"></span>
-<span class="w">        </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="fm">assert_eq!</span><span class="p">(</span><span class="w"></span>
-<span class="w">        </span><span class="n">kernel_space</span><span class="p">.</span><span class="n">page_table</span><span class="p">.</span><span class="n">translate</span><span class="p">(</span><span class="n">mid_data</span><span class="p">.</span><span class="n">floor</span><span class="p">()).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">executable</span><span class="p">(),</span><span class="w"></span>
-<span class="w">        </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"remap_test passed!"</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>其中分别通过手动查内核多级页表的方式验证代码段和只读数据段不允许被写入，同时不允许从数据段上取指。</p>
 </div>
 </div>
 <div class="section" id="term-trampoline">
-<span id="id6"></span><h2>跳板的实现<a class="headerlink" href="#term-trampoline" title="永久链接至标题">¶</a></h2>
+<span id="id4"></span><h2>跳板的实现<a class="headerlink" href="#term-trampoline" title="永久链接至标题">¶</a></h2>
 <p>上一小节我们看到无论是内核还是应用的地址空间，最高的虚拟页面都是一个跳板。同时应用地址空间的次高虚拟页面还被设置为用来
 存放应用的 Trap 上下文。那么跳板究竟起什么作用呢？为何不直接把 Trap 上下文仍放到应用的内核栈中呢？</p>
-<p>回忆曾在第二章介绍过的 <a class="reference internal" href="../chapter2/4trap-handling.html#trap-context-save-restore"><span class="std std-ref">Trap 上下文保存与恢复</span></a> 。当一个应用 Trap 到内核的时候，
+<p>回忆曾在第二章介绍过的，当一个应用 Trap 到内核的时候，
 <code class="docutils literal notranslate"><span class="pre">sscratch</span></code> 已经指出了该应用内核栈的栈顶，我们用一条指令即可从用户栈切换到内核栈，然后直接将 Trap 上下文压入内核栈
 栈顶。当 Trap 处理完毕返回用户态的时候，将 Trap 上下文中的内容恢复到寄存器上，最后将保存着应用用户栈顶的 <code class="docutils literal notranslate"><span class="pre">sscratch</span></code>
 与 sp 进行交换，也就从内核栈切换回了用户栈。在这个过程中， <code class="docutils literal notranslate"><span class="pre">sscratch</span></code> 起到了非常关键的作用，它使得我们可以在不破坏
@@ -444,7 +392,7 @@ Trap 的时候就需要进行地址空间切换，而在任务切换的时候无
 <p>之前设计方式的优点在于： Trap 的时候无需切换地址空间，而在任务切换的时候才需要切换地址空间。由于后者比前者更容易
 实现，这降低了实现的复杂度。而且在应用高频进行系统调用的时候能够避免地址空间切换的开销，这通常源于快表或 cache
 的失效问题。但是这种设计方式也有缺点：即内核的逻辑段需要在每个应用的地址空间内都映射一次，这会带来一些无法忽略的
-内存占用开销，并显著限制了嵌入式平台（如我们所采用的 K210 ）的任务并发数。此外，这种做法无法应对处理器的 <a class="reference external" href="https://cacm.acm.org/magazines/2020/6/245161-meltdown/fulltext">熔断
+内存占用开销，并显著限制了嵌入式平台的任务并发数。此外，这种做法无法应对处理器的 <a class="reference external" href="https://cacm.acm.org/magazines/2020/6/245161-meltdown/fulltext">熔断
 (Meltdown) 漏洞</a> ，使得恶意应用能够以某种方式看到它本来无权访问的地址空间中内核部分的数据。将内核与地址空间隔离
 便是修复此漏洞的一种方法。</p>
 <p>经过权衡，在本教程中我们参考 MIT 的教学 OS <a class="reference external" href="https://github.com/mit-pdos/xv6-riscv">xv6</a> ，
@@ -605,21 +553,21 @@ trap handler 入口点的地址。注意这里我们不能像之前的章节那�
 <p>这里我们为了实现方便并没有新增逻辑段 <code class="docutils literal notranslate"><span class="pre">MemoryArea</span></code> 而是直接在多级页表中插入一个从地址空间的最高虚拟页面映射到
 跳板汇编代码所在的物理页帧的键值对，访问方式限制与代码段相同，即 RX 。</p>
 <p>最后可以解释为何我们在 <code class="docutils literal notranslate"><span class="pre">__alltraps</span></code> 中需要借助寄存器 <code class="docutils literal notranslate"><span class="pre">jr</span></code> 而不能直接 <code class="docutils literal notranslate"><span class="pre">call</span> <span class="pre">trap_handler</span></code> 了。因为在
-内存布局中，这条 <code class="docutils literal notranslate"><span class="pre">.text.trampoline</span></code> 段中的跳转指令和 <code class="docutils literal notranslate"><span class="pre">trap_handler</span></code> 都在代码段之内，汇编器（Assembler）和链接器（Linker）会根据 <code class="docutils literal notranslate"><span class="pre">linker-qemu/k210.ld</span></code> 的地址布局描述，设定电子指令的地址，并计算二者地址偏移量
+内存布局中，这条 <code class="docutils literal notranslate"><span class="pre">.text.trampoline</span></code> 段中的跳转指令和 <code class="docutils literal notranslate"><span class="pre">trap_handler</span></code> 都在代码段之内，汇编器（Assembler）和链接器（Linker）会根据 <code class="docutils literal notranslate"><span class="pre">linker.ld</span></code> 的地址布局描述，设定电子指令的地址，并计算二者地址偏移量
 并让跳转指令的实际效果为当前 pc 自增这个偏移量。但实际上我们知道由于我们设计的缘故，这条跳转指令在被执行的时候，
 它的虚拟地址被操作系统内核设置在地址空间中的最高页面之内，加上这个偏移量并不能正确的得到 <code class="docutils literal notranslate"><span class="pre">trap_handler</span></code> 的入口地址。</p>
 <p><strong>问题的本质可以概括为：跳转指令实际被执行时的虚拟地址和在编译器/汇编器/链接器进行后端代码生成和链接形成最终机器码时设置此指令的地址是不同的。</strong></p>
 </div>
-<div class="section" id="id7">
-<h2>加载和执行应用程序<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
-<div class="section" id="id8">
-<h3>扩展任务控制块<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id5">
+<h2>加载和执行应用程序<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id6">
+<h3>扩展任务控制块<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <p>为了让应用在运行时有一个安全隔离且符合编译器给应用设定的地址空间布局的虚拟地址空间，操作系统需要对任务进行更多的管理，所以任务控制块相比第三章也包含了更多内容：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// os/src/task/task.rs</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">TaskControlBlock</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">4</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">task_cx_ptr</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">5</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">task_status</span>: <span class="nc">TaskStatus</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">4</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">task_status</span>: <span class="nc">TaskStatus</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">5</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">task_cx</span>: <span class="nc">TaskContext</span><span class="p">,</span><span class="w"></span>
 <span class="hll"><span class="linenos">6</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">memory_set</span>: <span class="nc">MemorySet</span><span class="p">,</span><span class="w"></span>
 </span><span class="hll"><span class="linenos">7</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">trap_cx_ppn</span>: <span class="nc">PhysPageNum</span><span class="p">,</span><span class="w"></span>
 </span><span class="hll"><span class="linenos">8</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">base_size</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
@@ -631,8 +579,8 @@ trap handler 入口点的地址。注意这里我们不能像之前的章节那�
 在应用地址空间中从 <span class="math notranslate nohighlight">\(\text{0x0}\)</span> 开始到用户栈结束一共包含多少字节。它后续还应该包含用于应用动态内存分配的
 堆空间的大小，但我们暂不支持。</p>
 </div>
-<div class="section" id="id9">
-<h3>更新对任务控制块的管理<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id7">
+<h3>更新对任务控制块的管理<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
 <p>下面是任务控制块的创建：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// os/src/config.rs</span>
 <span class="linenos"> 2</span>
@@ -657,34 +605,31 @@ trap handler 入口点的地址。注意这里我们不能像之前的章节那�
 <span class="linenos">21</span><span class="w">        </span><span class="c1">// map a kernel-stack in kernel space</span>
 <span class="linenos">22</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">kernel_stack_bottom</span><span class="p">,</span><span class="w"> </span><span class="n">kernel_stack_top</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kernel_stack_position</span><span class="p">(</span><span class="n">app_id</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">23</span><span class="w">        </span><span class="n">KERNEL_SPACE</span><span class="w"></span>
-<span class="linenos">24</span><span class="w">            </span><span class="p">.</span><span class="n">lock</span><span class="p">()</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">            </span><span class="p">.</span><span class="n">exclusive_access</span><span class="p">()</span><span class="w"></span>
 <span class="linenos">25</span><span class="w">            </span><span class="p">.</span><span class="n">insert_framed_area</span><span class="p">(</span><span class="w"></span>
 <span class="linenos">26</span><span class="w">                </span><span class="n">kernel_stack_bottom</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"></span>
 <span class="linenos">27</span><span class="w">                </span><span class="n">kernel_stack_top</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"></span>
 <span class="linenos">28</span><span class="w">                </span><span class="n">MapPermission</span>::<span class="n">R</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">MapPermission</span>::<span class="n">W</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">29</span><span class="w">            </span><span class="p">);</span><span class="w"></span>
-<span class="linenos">30</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">task_cx_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">kernel_stack_top</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">core</span>::<span class="n">mem</span>::<span class="n">size_of</span>::<span class="o">&lt;</span><span class="n">TaskContext</span><span class="o">&gt;</span><span class="p">())</span><span class="w"></span>
-<span class="linenos">31</span><span class="w">            </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">TaskContext</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">32</span><span class="w">        </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="n">task_cx_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TaskContext</span>::<span class="n">goto_trap_return</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">33</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">task_control_block</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">34</span><span class="w">            </span><span class="n">task_cx_ptr</span>: <span class="nc">task_cx_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">35</span><span class="w">            </span><span class="n">task_status</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">36</span><span class="w">            </span><span class="n">memory_set</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">37</span><span class="w">            </span><span class="n">trap_cx_ppn</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">38</span><span class="w">            </span><span class="n">base_size</span>: <span class="nc">user_sp</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">39</span><span class="w">        </span><span class="p">};</span><span class="w"></span>
-<span class="linenos">40</span><span class="w">        </span><span class="c1">// prepare TrapContext in user space</span>
-<span class="linenos">41</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">task_control_block</span><span class="p">.</span><span class="n">get_trap_cx</span><span class="p">();</span><span class="w"></span>
-<span class="linenos">42</span><span class="w">        </span><span class="o">*</span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TrapContext</span>::<span class="n">app_init_context</span><span class="p">(</span><span class="w"></span>
-<span class="linenos">43</span><span class="w">            </span><span class="n">entry_point</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">44</span><span class="w">            </span><span class="n">user_sp</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">45</span><span class="w">            </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">token</span><span class="p">(),</span><span class="w"></span>
-<span class="linenos">46</span><span class="w">            </span><span class="n">kernel_stack_top</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">47</span><span class="w">            </span><span class="n">trap_handler</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">48</span><span class="w">        </span><span class="p">);</span><span class="w"></span>
-<span class="linenos">49</span><span class="w">        </span><span class="n">task_control_block</span><span class="w"></span>
-<span class="linenos">50</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">51</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">        </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">30</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">task_control_block</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">31</span><span class="w">            </span><span class="n">task_status</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">            </span><span class="n">task_cx</span>: <span class="nc">TaskContext</span>::<span class="n">goto_trap_return</span><span class="p">(</span><span class="n">kernel_stack_top</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">33</span><span class="w">            </span><span class="n">memory_set</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">34</span><span class="w">            </span><span class="n">trap_cx_ppn</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">35</span><span class="w">            </span><span class="n">base_size</span>: <span class="nc">user_sp</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">36</span><span class="w">        </span><span class="p">};</span><span class="w"></span>
+<span class="linenos">37</span><span class="w">        </span><span class="c1">// prepare TrapContext in user space</span>
+<span class="linenos">38</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">task_control_block</span><span class="p">.</span><span class="n">get_trap_cx</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">39</span><span class="w">        </span><span class="o">*</span><span class="n">trap_cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TrapContext</span>::<span class="n">app_init_context</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">40</span><span class="w">            </span><span class="n">entry_point</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">41</span><span class="w">            </span><span class="n">user_sp</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">42</span><span class="w">            </span><span class="n">KERNEL_SPACE</span><span class="p">.</span><span class="n">exclusive_access</span><span class="p">().</span><span class="n">token</span><span class="p">(),</span><span class="w"></span>
+<span class="linenos">43</span><span class="w">            </span><span class="n">kernel_stack_top</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">44</span><span class="w">            </span><span class="n">trap_handler</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">45</span><span class="w">        </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">46</span><span class="w">        </span><span class="n">task_control_block</span><span class="w"></span>
+<span class="linenos">47</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">48</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -695,14 +640,10 @@ trap handler 入口点的地址。注意这里我们不能像之前的章节那�
 加入到内核地址空间中；</p></li>
 </ul>
 <ul id="trap-return-intro">
-<li><p>第 30~32 行，我们在应用的内核栈顶压入一个跳转到 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 而不是 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的任务上下文，这主要是为了能够支持对该应用的启动并顺利切换到用户地址空间执行。在构造方式上，只是将 ra 寄存器的值设置为 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 的地址。 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 是我们后面要介绍的
-新版的 Trap 处理的一部分。</p>
-<p>这里我们对裸指针解引用成立的原因在于：我们之前已经进入了内核地址空间，而我们要操作的内核栈也是在内核地址空间中的；</p>
-</li>
-<li><p>第 33 行开始我们用上面的信息来创建任务控制块实例 <code class="docutils literal notranslate"><span class="pre">task_control_block</span></code>；</p></li>
-<li><p>第 41 行我们需要初始化该应用的 Trap 上下文，由于它是在应用地址空间而不是在内核地址空间中，我们只能手动查页表找到
-Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a class="reference internal" href="4sv39-implementation-2.html#access-frame-in-kernel-as"><span class="std std-ref">在内核地址空间读写特定物理页帧的能力</span></a>
-获得在用户空间的 Trap 上下文的可变引用用于初始化：</p>
+<li><p>我们在应用的内核栈顶压入一个跳转到 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 而不是 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的任务上下文，这主要是为了能够支持对该应用的启动并顺利切换到用户地址空间执行。在构造方式上，只是将 ra 寄存器的值设置为 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 的地址。 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 是我们后面要介绍的
+新版的 Trap 处理的一部分。</p></li>
+<li><p>初始化该应用的 Trap 上下文，由于它是在应用地址空间而不是在内核地址空间中，我们只能手动查页表找到
+Trap 上下文实际被放在的物理页帧，再获得在用户空间的 Trap 上下文的可变引用用于初始化：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/task/task.rs</span>
 
 <span class="k">impl</span><span class="w"> </span><span class="n">TaskControlBlock</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -715,8 +656,6 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
 <p>此处需要说明的是，返回 <code class="docutils literal notranslate"><span class="pre">'static</span></code> 的可变引用和之前一样可以看成一个绕过 unsafe 的裸指针；而 <code class="docutils literal notranslate"><span class="pre">PhysPageNum::get_mut</span></code>
 是一个泛型函数，由于我们已经声明了总体返回 <code class="docutils literal notranslate"><span class="pre">TrapContext</span></code> 的可变引用，则Rust编译器会给 <code class="docutils literal notranslate"><span class="pre">get_mut</span></code> 泛型函数针对具体类型 <code class="docutils literal notranslate"><span class="pre">TrapContext</span></code>
 的情况生成一个特定版本的 <code class="docutils literal notranslate"><span class="pre">get_mut</span></code> 函数实现。在 <code class="docutils literal notranslate"><span class="pre">get_trap_cx</span></code> 函数中则会静态调用``get_mut`` 泛型函数的特定版本实现。</p>
-</li>
-<li><p>第 42 行我们正式通过 Trap 上下文的可变引用来对其进行初始化：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// os/src/trap/context.rs</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="k">impl</span><span class="w"> </span><span class="n">TrapContext</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -758,25 +697,24 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="n">lazy_static</span><span class="o">!</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">ref</span><span class="w"> </span><span class="n">TASK_MANAGER</span>: <span class="nc">TaskManager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">10</span><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">"init TASK_MANAGER"</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">        </span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">"init TASK_MANAGER"</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">11</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">num_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_num_app</span><span class="p">();</span><span class="w"></span>
-<span class="linenos">12</span><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">"num_app = {}"</span><span class="p">,</span><span class="w"> </span><span class="n">num_app</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">        </span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">"num_app = {}"</span><span class="p">,</span><span class="w"> </span><span class="n">num_app</span><span class="p">);</span><span class="w"></span>
 <span class="linenos">13</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">tasks</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">TaskControlBlock</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w"></span>
 <span class="linenos">14</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">num_app</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">            </span><span class="n">tasks</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">TaskControlBlock</span>::<span class="n">new</span><span class="p">(</span><span class="w"></span>
-<span class="linenos">16</span><span class="w">                </span><span class="n">get_app_data</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="w"></span>
-<span class="linenos">17</span><span class="w">                </span><span class="n">i</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">18</span><span class="w">            </span><span class="p">));</span><span class="w"></span>
-<span class="linenos">19</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">20</span><span class="w">        </span><span class="n">TaskManager</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">21</span><span class="w">            </span><span class="n">num_app</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">            </span><span class="n">inner</span>: <span class="nc">RefCell</span>::<span class="n">new</span><span class="p">(</span><span class="n">TaskManagerInner</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">23</span><span class="w">                </span><span class="n">tasks</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">24</span><span class="w">                </span><span class="n">current_task</span>: <span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">25</span><span class="w">            </span><span class="p">}),</span><span class="w"></span>
-<span class="linenos">26</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">27</span><span class="w">    </span><span class="p">};</span><span class="w"></span>
-<span class="linenos">28</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">            </span><span class="n">tasks</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">TaskControlBlock</span>::<span class="n">new</span><span class="p">(</span><span class="n">get_app_data</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="w"> </span><span class="n">i</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">        </span><span class="n">TaskManager</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">            </span><span class="n">num_app</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">            </span><span class="n">inner</span>: <span class="nc">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">                </span><span class="n">UPSafeCell</span>::<span class="n">new</span><span class="p">(</span><span class="n">TaskManagerInner</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">                    </span><span class="n">tasks</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">                    </span><span class="n">current_task</span>: <span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">23</span><span class="w">                </span><span class="p">})</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="linenos">27</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>可以看到，在 <code class="docutils literal notranslate"><span class="pre">TaskManagerInner</span></code> 中我们使用向量 <code class="docutils literal notranslate"><span class="pre">Vec</span></code> 来保存任务控制块。在全局任务管理器 <code class="docutils literal notranslate"><span class="pre">TASK_MANAGER</span></code>
@@ -786,35 +724,9 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
 <p>回过头来介绍一下应用构建器 <code class="docutils literal notranslate"><span class="pre">os/build.rs</span></code> 的改动：</p>
 <ul class="simple">
 <li><p>首先，我们在 <code class="docutils literal notranslate"><span class="pre">.incbin</span></code> 中不再插入清除全部符号的应用二进制镜像 <code class="docutils literal notranslate"><span class="pre">*.bin</span></code> ，而是将构建得到的 ELF 格式文件直接链接进来；</p></li>
-<li><p>其次，在链接每个 ELF 格式文件之前我们都加入一行 <code class="docutils literal notranslate"><span class="pre">.align</span> <span class="pre">3</span></code> 来确保它们对齐到 8 字节，这是由于如果不这样做， <code class="docutils literal notranslate"><span class="pre">xmas-elf</span></code> crate 可能会在解析 ELF 的时候进行不对齐的内存读写，例如使用 <code class="docutils literal notranslate"><span class="pre">ld</span></code> 指令从内存的一个没有对齐到 8 字节的地址加载一个 64 位的值到一个通用寄存器。而在 k210 平台上，由于其硬件限制，这会触发一个内存读写不对齐的异常，导致解析无法正常完成。</p></li>
+<li><p>其次，在链接每个 ELF 格式文件之前我们都加入一行 <code class="docutils literal notranslate"><span class="pre">.align</span> <span class="pre">3</span></code> 来确保它们对齐到 8 字节，这是由于如果不这样做， <code class="docutils literal notranslate"><span class="pre">xmas-elf</span></code> crate 可能会在解析 ELF 的时候进行不对齐的内存读写，例如使用 <code class="docutils literal notranslate"><span class="pre">ld</span></code> 指令从内存的一个没有对齐到 8 字节的地址加载一个 64 位的值到一个通用寄存器。</p></li>
 </ul>
-<p>为了方便后续的实现，全局任务管理器还需要提供关于当前应用与地址空间有关的一些信息：</p>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// os/src/task/mod.rs</span>
-<span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="k">impl</span><span class="w"> </span><span class="n">TaskManager</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">        </span><span class="k">fn</span> <span class="nf">get_current_token</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">usize</span> <span class="p">{</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">inner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">inner</span><span class="p">.</span><span class="n">borrow</span><span class="p">();</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inner</span><span class="p">.</span><span class="n">current_task</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 7</span><span class="w">        </span><span class="n">inner</span><span class="p">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">current</span><span class="p">].</span><span class="n">get_user_token</span><span class="p">()</span><span class="w"></span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="linenos"> 9</span>
-<span class="linenos">10</span><span class="w">    </span><span class="k">fn</span> <span class="nf">get_current_trap_cx</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">TrapContext</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">11</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">inner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">inner</span><span class="p">.</span><span class="n">borrow</span><span class="p">();</span><span class="w"></span>
-<span class="linenos">12</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inner</span><span class="p">.</span><span class="n">current_task</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">13</span><span class="w">        </span><span class="n">inner</span><span class="p">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">current</span><span class="p">].</span><span class="n">get_trap_cx</span><span class="p">()</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">15</span><span class="p">}</span><span class="w"></span>
-<span class="linenos">16</span>
-<span class="linenos">17</span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">current_user_token</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kt">usize</span> <span class="p">{</span><span class="w"></span>
-<span class="linenos">18</span><span class="w">    </span><span class="n">TASK_MANAGER</span><span class="p">.</span><span class="n">get_current_token</span><span class="p">()</span><span class="w"></span>
-<span class="linenos">19</span><span class="p">}</span><span class="w"></span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">current_trap_cx</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="o">'</span><span class="nb">static</span> <span class="nc">mut</span><span class="w"> </span><span class="n">TrapContext</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">    </span><span class="n">TASK_MANAGER</span><span class="p">.</span><span class="n">get_current_trap_cx</span><span class="p">()</span><span class="w"></span>
-<span class="linenos">23</span><span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>通过 <code class="docutils literal notranslate"><span class="pre">current_user_token</span></code> 和 <code class="docutils literal notranslate"><span class="pre">current_trap_cx</span></code> 分别可以获得当前正在执行的应用的地址空间的 token 和可以在
+<p>为了方便后续的实现，全局任务管理器还需要提供关于当前应用与地址空间有关的一些信息。通过 <code class="docutils literal notranslate"><span class="pre">current_user_token</span></code> 和 <code class="docutils literal notranslate"><span class="pre">current_trap_cx</span></code> 分别可以获得当前正在执行的应用的地址空间的 token 和可以在
 内核地址空间中修改位于该应用地址空间中的 Trap 上下文的可变引用。</p>
 </div>
 </div>
@@ -874,14 +786,17 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
 <span class="linenos">17</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="linenos">18</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">restore_va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__restore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">__alltraps</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">TRAMPOLINE</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">19</span><span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">20</span><span class="w">        </span><span class="fm">llvm_asm!</span><span class="p">(</span><span class="s">"fence.i"</span><span class="w"> </span>:::: <span class="s">"volatile"</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">21</span><span class="w">        </span><span class="fm">llvm_asm!</span><span class="p">(</span><span class="s">"jr $0"</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">            </span>:: <span class="s">"r"</span><span class="p">(</span><span class="n">restore_va</span><span class="p">),</span><span class="w"> </span><span class="s">"{a0}"</span><span class="p">(</span><span class="n">trap_cx_ptr</span><span class="p">),</span><span class="w"> </span><span class="s">"{a1}"</span><span class="p">(</span><span class="n">user_satp</span><span class="p">)</span><span class="w"></span>
-<span class="linenos">23</span><span class="w">            </span>:: <span class="s">"volatile"</span><span class="w"></span>
-<span class="linenos">24</span><span class="w">        </span><span class="p">);</span><span class="w"></span>
-<span class="linenos">25</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">26</span><span class="w">    </span><span class="fm">panic!</span><span class="p">(</span><span class="s">"Unreachable in back_to_user!"</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">27</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">            </span><span class="fm">asm!</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">            </span><span class="s">"fence.i"</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">            </span><span class="s">"jr {restore_va}"</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">23</span><span class="w">            </span><span class="n">restore_va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">in</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span><span class="w"> </span><span class="n">restore_va</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">"a0"</span><span class="p">)</span><span class="w"> </span><span class="n">trap_cx_ptr</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">            </span><span class="k">in</span><span class="p">(</span><span class="s">"a1"</span><span class="p">)</span><span class="w"> </span><span class="n">user_satp</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">            </span><span class="n">options</span><span class="p">(</span><span class="n">noreturn</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">27</span><span class="w">        </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">28</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">    </span><span class="fm">panic!</span><span class="p">(</span><span class="s">"Unreachable in back_to_user!"</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">30</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -895,26 +810,11 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
 关键在于如何找到 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 在内核/应用地址空间中共同的虚拟地址。第 18 行我们展示了计算它的过程：由于
 <code class="docutils literal notranslate"><span class="pre">__alltraps</span></code> 是对齐到地址空间跳板页面的起始地址 <code class="docutils literal notranslate"><span class="pre">TRAMPOLINE</span></code> 上的， 则 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的虚拟地址只需在
 <code class="docutils literal notranslate"><span class="pre">TRAMPOLINE</span></code> 基础上加上 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 相对于 <code class="docutils literal notranslate"><span class="pre">__alltraps</span></code> 的偏移量即可。这里 <code class="docutils literal notranslate"><span class="pre">__alltraps</span></code> 和
-<code class="docutils literal notranslate"><span class="pre">__restore</span></code> 都是指编译器在链接时看到的内核内存布局中的地址。在第 21 行我们使用 <code class="docutils literal notranslate"><span class="pre">jr</span></code> 指令完成了跳转的任务。</p></li>
-<li><p>在开始执行应用之前，第 20 行我们需要使用 <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> 指令清空指令缓存 i-cache 。这是因为，在内核中进行的一些操作
+<code class="docutils literal notranslate"><span class="pre">__restore</span></code> 都是指编译器在链接时看到的内核内存布局中的地址。我们使用 <code class="docutils literal notranslate"><span class="pre">jr</span></code> 指令完成了跳转的任务。</p></li>
+<li><p>在开始执行应用之前，我们需要使用 <code class="docutils literal notranslate"><span class="pre">fence.i</span></code> 指令清空指令缓存 i-cache 。这是因为，在内核中进行的一些操作
 可能导致一些原先存放某个应用代码的物理页帧如今用来存放数据或者是其他应用的代码，i-cache 中可能还保存着该物理页帧的
 错误快照。因此我们直接将整个 i-cache 清空避免错误。</p></li>
 </ul>
-<p>当每个应用第一次获得 CPU 使用权即将进入用户态执行的时候，它的内核栈顶放置着我们在
-<a class="reference internal" href="#trap-return-intro"><span class="std std-ref">内核加载应用的时候</span></a> 构造的一个任务上下文：</p>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// os/src/task/context.rs</span>
-
-<span class="k">impl</span><span class="w"> </span><span class="n">TaskContext</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">goto_trap_return</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">ra</span>: <span class="nc">trap_return</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="n">s</span>: <span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="mi">12</span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>在 <code class="docutils literal notranslate"><span class="pre">__switch</span></code> 切换到它的时候，这将会跳转到 <code class="docutils literal notranslate"><span class="pre">trap_return</span></code> 并第一次返回用户态。</p>
 </div>
 <div class="section" id="sys-write">
 <h2>改进 sys_write 的实现<a class="headerlink" href="#sys-write" title="永久链接至标题">¶</a></h2>
@@ -973,11 +873,6 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
 </div>
 <p>我们尝试将每个字节数组切片转化为字符串 <code class="docutils literal notranslate"><span class="pre">&amp;str</span></code> 然后输出即可。</p>
 </div>
-<div class="section" id="id10">
-<h2>小结<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
-<p>这一章内容很多，讲解了 <strong>地址空间</strong> 这一抽象概念是如何在一个具体的“头甲龙”操作系统中实现的。这里面的核心内容是如何建立基于页表机制的虚拟地址空间。为此，操作系统需要知道并管理整个系统中的物理内存；需要建立虚拟地址到物理地址映射关系的页表；并基于页表给操作系统自身和每个应用提供一个虚拟地址空间；并需要对管理应用的任务控制块进行扩展，确保能对应用的地址空间进行管理；由于应用和内核的地址空间是隔离的，需要有一个跳板来帮助完成应用与内核之间的切换执行；并导致了对异常、中断、系统调用的相应更改。这一系列的改进，最终的效果是编写应用更加简单了，且应用的执行或错误不会影响到内核和其他应用的正常工作。为了得到这些好处，我们需要比较费劲地进化我们的操作系统。如果同学结合阅读代码，编译并运行应用+内核，读懂了上面的文档，那完成本章的实验就有了一个坚实的基础。</p>
-<p>如果同学能想明白如何插入/删除页表；如何在 <code class="docutils literal notranslate"><span class="pre">trap_handler</span></code> 下处理 <code class="docutils literal notranslate"><span class="pre">LoadPageFault</span></code> ；以及 <code class="docutils literal notranslate"><span class="pre">sys_get_time</span></code> 在使能页机制下如何实现，那就会发现下一节的实验练习也许 <strong>就和lab1一样</strong> 。</p>
-</div>
 </div>
 
       </article>
@@ -1035,21 +930,18 @@ Trap 上下文实际被放在的物理页帧，然后通过之前介绍的 <a cl
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">基于地址空间的分时多任务</a><ul>
-<li><a class="reference internal" href="#id2">本节导读</a></li>
-<li><a class="reference internal" href="#id3">建立并开启基于分页模式的虚拟地址空间</a><ul>
-<li><a class="reference internal" href="#id4">创建内核地址空间</a></li>
-<li><a class="reference internal" href="#id5">检查内核地址空间的多级页表设置</a></li>
+<li><a class="reference internal" href="#id2">建立并开启基于分页模式的虚拟地址空间</a><ul>
+<li><a class="reference internal" href="#id3">创建内核地址空间</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#term-trampoline">跳板的实现</a></li>
-<li><a class="reference internal" href="#id7">加载和执行应用程序</a><ul>
-<li><a class="reference internal" href="#id8">扩展任务控制块</a></li>
-<li><a class="reference internal" href="#id9">更新对任务控制块的管理</a></li>
+<li><a class="reference internal" href="#id5">加载和执行应用程序</a><ul>
+<li><a class="reference internal" href="#id6">扩展任务控制块</a></li>
+<li><a class="reference internal" href="#id7">更新对任务控制块的管理</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#trap">改进 Trap 处理的实现</a></li>
 <li><a class="reference internal" href="#sys-write">改进 sys_write 的实现</a></li>
-<li><a class="reference internal" href="#id10">小结</a></li>
 </ul>
 </li>
 </ul>
