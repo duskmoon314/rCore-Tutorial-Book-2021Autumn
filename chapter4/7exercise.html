@@ -243,18 +243,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../appendix-d/1asm.html">RISCV汇编相关</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../appendix-d/2rv.html">RISCV硬件相关</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">开发注记</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -288,11 +284,11 @@
 <h2>编程作业<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <div class="section" id="sys-get-time">
 <h3>重写 sys_get_time<a class="headerlink" href="#sys-get-time" title="永久链接至标题">¶</a></h3>
+<p>引入虚存机制后，原来内核的 sys_get_time 函数实现就无效了。请你重写这个函数，恢复其正常功能。</p>
 </div>
 <div class="section" id="id2">
 <h3>申请内存<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
-<p>你有没有想过，当你在 C 语言中写下的 <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">int[100];</span></code> 执行时可能会发生哪些事情？你可能已经发现，目前我们给用户程序的内存都是固定的并没有增长的能力，这些程序是不能执行 <code class="docutils literal notranslate"><span class="pre">new</span></code> 这类导致内存使用增加的操作。libc 中通过 <a class="reference external" href="https://linux.die.net/man/2/sbrk">sbrk</a> 系统调用增加进程可使用的堆空间，这也是本来的题目设计，但是一位热心的往年助教J学长表示：这一点也不酷！他推荐了另一个申请内存的系统调用。</p>
-<p><a class="reference external" href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a> 本身主要使用来在内存中映射文件的，这里我们简化它的功能，仅仅用来提供申请内存的功能。</p>
+<p><a class="reference external" href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a> 本身主要使用在内存中映射文件，这里我们简化它的功能，仅仅用来提供申请内存的功能。</p>
 <p>mmap 系统调用新定义：</p>
 <ul class="simple">
 <li><p>syscall ID：222</p></li>
@@ -302,7 +298,7 @@
 <li><dl class="simple">
 <dt>参数：</dt><dd><ul>
 <li><p>start：需要映射的虚存起始地址。</p></li>
-<li><p>len：映射字节长度，可以为 0 （如果是则直接返回），不可过大(上限 1GiB )。</p></li>
+<li><p>len：映射字节长度，可以为 0 （如果是则直接返回），不可过大 (上限 1GiB )。</p></li>
 <li><p>port：第 0 位表示是否可读，第 1 位表示是否可写，第 2 位表示是否可执行。其他位无效（必须为 0 ）。</p></li>
 </ul>
 </dd>
@@ -355,16 +351,53 @@
 <h3>实验要求<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>实现分支：ch4。</p></li>
-<li><p>实现 mmap 和 munmap 两个自定义系统调用，通过所有测例。</p></li>
+<li><p>实现 mmap 和 munmap 两个系统调用，通过所有测例。务必注意，你仍需通过来自 ch3 的某些测例 (<code class="docutils literal notranslate"><span class="pre">test_write1</span></code>)，以后各次实验都需要通过先前的部分测例。</p></li>
 </ul>
 <p>在 os 目录下 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=1</span></code> 执行测例。</p>
 </div>
 <div class="section" id="id4">
 <h3>实验检查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>实验目录要求同 ch3</p></li>
+</ul>
 </div>
 </div>
 <div class="section" id="id5">
 <h2>问答作业<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ol class="arabic">
+<li><p>请列举 SV39 页表页表项的组成，描述其中的标志位有何作用？</p></li>
+<li><dl>
+<dt>缺页</dt><dd><p>缺页指的是进程访问页面时页面不在页表中或在页表中无效的现象，此时 MMU 将会返回一个中断，告知 os 进程内存访问出了问题。os 选择填补页表并重新执行异常指令或者杀死进程。</p>
+<ul class="simple">
+<li><p>请问哪些异常可能是缺页导致的？</p></li>
+<li><p>发生缺页时，描述相关的重要寄存器的值。</p></li>
+</ul>
+<p>缺页有两个常见的原因，其一是 Lazy 策略，也就是直到内存页面被访问才实际进行页表操作。比如，一个程序被执行时，进程的代码段理论上需要从磁盘加载到内存。但是 os 并不会马上这样做，而是会保存 .text 段在磁盘的位置信息，在这些代码第一次被执行时才完成从磁盘的加载操作。</p>
+<ul class="simple">
+<li><p>这样做有哪些好处？</p></li>
+</ul>
+<p>其实，我们的 mmap 也可以采取 Lazy 策略，比如：一个用户进程先后申请了 10G 的内存空间，然后用了其中 1M 就直接退出了。按照现在的做法，我们显然亏大了，进行了很多没有意义的页表操作。</p>
+<ul class="simple">
+<li><p>处理 10G 连续的内存页面，对应的 SV39 页表大致占用多少内存 (估算数量级即可)？</p></li>
+<li><p>请简单思考如何才能实现 Lazy 策略，缺页时又如何处理？描述合理即可，不需要考虑实现。</p></li>
+</ul>
+<p>缺页的另一个常见原因是 swap 策略，也就是内存页面可能被换到磁盘上了，导致对应页面失效。</p>
+<ul class="simple">
+<li><p>此时页面失效如何表现在页表项(PTE)上？</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>双页表与单页表</p>
+<p>为了防范侧信道攻击，我们的 os 使用了双页表。但是传统的设计一直是单页表的，也就是说，用户线程和对应的内核线程共用同一张页表，只不过内核对应的地址只允许在内核态访问。(备注：这里的单/双的说法仅为自创的通俗说法，并无这个名词概念，详情见 <a class="reference external" href="https://en.wikipedia.org/wiki/Kernel_page-table_isolation">KPTI</a> )</p>
+<ul class="simple">
+<li><p>如何更换页表？</p></li>
+<li><p>单页表情况下，如何控制用户态无法访问内核页面？（tips:看看上一题最后一问）</p></li>
+<li><p>单页表有何优势？（回答合理即可）</p></li>
+<li><p>双页表实现下，何时需要更换页表？假设你写一个单页表操作系统，你会选择何时更换页表（回答合理即可）？</p></li>
+</ul>
+</li>
+</ol>
 </div>
 <div class="section" id="id6">
 <h2>报告要求<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>

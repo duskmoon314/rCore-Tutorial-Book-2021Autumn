@@ -2,7 +2,7 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="RISCV汇编相关" href="1asm.html" /><link rel="prev" title="附录 C：深入机器模式：RustSBI" href="../appendix-c/index.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="修改和构建本项目" href="../setup-sphinx.html" /><link rel="prev" title="附录 C：深入机器模式：RustSBI" href="../appendix-c/index.html" />
 
     <meta name="generator" content="sphinx-4.1.2, furo 2021.08.31"/>
         <title>附录 D：RISC-V相关信息 - rCore-Tutorial-Autumn2021 文档</title>
@@ -135,7 +135,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -243,18 +243,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">附录 D：RISC-V相关信息</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="1asm.html">RISCV汇编相关</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2rv.html">RISCV硬件相关</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">附录 D：RISC-V相关信息</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">开发注记</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -277,14 +273,43 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <div class="section" id="d-risc-v">
 <h1>附录 D：RISC-V相关信息<a class="headerlink" href="#d-risc-v" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
+<div class="section" id="riscv">
+<h2>RISCV汇编相关<a class="headerlink" href="#riscv" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/riscv/riscv-asm-manual/blob/master/riscv-asm.md">RISC-V Assembly Programmer’s Manual</a></p></li>
+<li><p><a class="reference external" href="https://github.com/riscv/riscv-tests">RISC-V Low-level Test Suits</a></p></li>
+<li><p><a class="reference external" href="https://github.com/RISCVERS/coremark-pro">CoreMark®-PRO comprehensive, advanced processor benchmark</a></p></li>
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/39321554/how-do-i-use-the-riscv-tests-suite">riscv-tests的使用</a></p></li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h2>RISCV硬件相关<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>Quick Reference</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/regs_abi.html">Registers &amp; ABI</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/interrupts.html">Interrupt</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/isa_ext.html">ISA &amp; Extensions</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/tools.html">Toolchain</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/csrs.html">Control and Status Registers (CSRs)</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/csrs-access.html">Accessing CSRs</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/quickref/instructions.html">Assembler &amp; Instructions</a></p></li>
+</ul>
+<p>ISA</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://five-embeddev.com/riscv-isa-manual/latest/riscv-spec.html">User-Level ISA, Version 1.12</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/riscv-isa-manual/latest/supervisor.html">4 Supervisor-Level ISA, Version 1.12</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/riscv-v-spec/draft/v-spec.html">Vector Extension</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/riscv-bitmanip/draft/bitmanip.html">RISC-V Bitmanip Extension</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/riscv-debug-spec/latest/riscv-debug-spec.html">External Debug</a></p></li>
+<li><p><a class="reference external" href="https://five-embeddev.com/riscv-isa-manual/">ISA Resources</a></p></li>
+</ul>
 </div>
 </div>
 
@@ -292,12 +317,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="1asm.html">
+          <a class="next-page" href="../setup-sphinx.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">RISCV汇编相关</div>
+                <div class="title">修改和构建本项目</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -330,8 +355,28 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">附录 D：RISC-V相关信息</a><ul>
+<li><a class="reference internal" href="#riscv">RISCV汇编相关</a></li>
+<li><a class="reference internal" href="#id1">RISCV硬件相关</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

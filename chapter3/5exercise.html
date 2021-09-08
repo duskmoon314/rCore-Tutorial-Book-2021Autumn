@@ -243,18 +243,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-c/index.html">附录 C：深入机器模式：RustSBI</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../appendix-d/1asm.html">RISCV汇编相关</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../appendix-d/2rv.html">RISCV硬件相关</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix-d/index.html">附录 D：RISC-V相关信息</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">开发注记</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../setup-sphinx.html">修改和构建本项目</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rest-example.html">reStructuredText 基本语法</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -288,7 +284,7 @@
 <h2>编程作业<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <div class="section" id="id2">
 <h3>简单安全检查<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
-<p>lab2 中，我们实现了第一个系统调用 <code class="docutils literal notranslate"><span class="pre">sys_write</span></code>，这使得我们可以在用户态输出信息。但是 os 在提供服务的同时，还有保护 os 本身以及其他用户程序不受错误或者恶意程序破坏的功能。</p>
+<p>ch2 中，我们实现了第一个系统调用 <code class="docutils literal notranslate"><span class="pre">sys_write</span></code>，这使得我们可以在用户态输出信息。但是 os 在提供服务的同时，还有保护 os 本身以及其他用户程序不受错误或者恶意程序破坏的功能。</p>
 <p>由于还没有实现虚拟内存，我们可以在用户程序中指定一个属于其他程序字符串，并将它输出，这显然是不合理的，因此我们要对 sys_write 做检查：</p>
 <ul class="simple">
 <li><p>sys_write 仅能输出位于程序本身内存空间内的数据，否则报错。</p></li>
@@ -296,7 +292,7 @@
 </div>
 <div class="section" id="stride">
 <h3>stride 调度算法<a class="headerlink" href="#stride" title="永久链接至标题">¶</a></h3>
-<p>lab3中我们引入了任务调度的概念，可以在不同任务之间切换，目前我们实现的调度算法十分简单，存在一些问题且不存在优先级。现在我们要为我们的 os 实现一种带优先级的调度算法：stide 调度算法。</p>
+<p>ch3 中我们实现的调度算法十分简单。现在我们要为我们的 os 实现一种带优先级的调度算法：stide 调度算法。</p>
 <p>算法描述如下:</p>
 <ol class="arabic simple">
 <li><p>为每个进程设置一个当前 stride，表示该进程当前已经运行的“长度”。另外设置其对应的 pass 值（只与进程的优先权有关系），表示对应进程在调度后，stride 需要进行的累加值。</p></li>
@@ -310,32 +306,124 @@
 <li><p>进程初始 stride 设置为 0 即可。</p></li>
 <li><p>进程初始优先级设置为 16。</p></li>
 </ul>
-<p>tips: 可以使用优先级队列比较方便的实现 stride 算法，但是我们的实验不考察效率，所以手写一个简单粗暴的也完全没问题。</p>
-<p>TODO：说明 set_prio 系统调用</p>
+<p>为了实现该调度算法，内核还要增加 set_prio 系统调用</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="c1">// 输入参数：进程优先级，要求 prio &gt;= 2</span>
+<span class="c1">// 返回值：如果输入合法则返回 0，否则返回 -1</span>
+<span class="k">fn</span> <span class="nf">sys_set_priority</span><span class="p">(</span><span class="n">prio</span>: <span class="kt">isize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">isize</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="id3">
 <h3>实验要求<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>完成分支: ch3。</p></li>
-<li><p>通过所有测例</p></li>
+<li><p>通过所有测例：</p></li>
 </ul>
-<p>lab3 有 2 类测例，在 os 目录下执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=1</span></code> 检查基本 syscall 的实现，执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=2</span></code> 检查 stride 调度算法实现的正确性。</p>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
+<p>lab3 有 2 类测例，在 os 目录下执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=1</span></code> 检查基本 syscall 的实现，执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span> <span class="pre">TEST=2</span></code> 检查 stride 调度算法。</p>
+<div class="admonition attention">
+<p class="admonition-title">注意</p>
 <p>为了让大家能在本编程作业中使用 <code class="docutils literal notranslate"><span class="pre">Vec</span></code> 等数据结构，我们利用第三方库 <code class="docutils literal notranslate"><span class="pre">buddy_system_allocator</span></code> 为大家实现了堆内存分配器，相关代码位于 <code class="docutils literal notranslate"><span class="pre">heap_alloc</span></code> 模块。</p>
 <p>背景知识： <a class="reference external" href="https://rcore-os.github.io/rCore-Tutorial-Book-v3/chapter4/1rust-dynamic-allocation.html">Rust 中的动态内存分配</a></p>
 </div>
-<div class="admonition attention">
-<p class="admonition-title">注意</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
 <p>你的实现只需且必须通过测例，建议读者感到困惑时先检查测例。</p>
 </div>
 </div>
 <div class="section" id="id4">
 <h3>实验检查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>实验目录要求</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── os(内核实现)
+│   ├── Cargo.toml(配置文件)
+│   └── src(所有内核的源代码放在 os/src 目录下)
+│       ├── main.rs(内核主函数)
+│       └── ...
+├── reports (不是 report)
+│   ├── lab1.md/pdf
+│   └── ...
+├── ...
+</pre></div>
+</div>
+<p>测试时 os/makefile 文件和 user 文件夹将被替换。</p>
 </div>
 </div>
 <div class="section" id="id5">
 <h2>简答作业<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ol class="arabic">
+<li><p>请自行阅读 ch3 的 os/Makefile 和 user/Makefile 文件，描述在 os 目录下执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code> 时执行了哪些命令。</p></li>
+<li><p>请问 riscv64 支持哪些中断 / 异常？如何判断进入内核是由于中断还是异常？为了方便 os 处理，Ｍ 态软件会将 S 态异常/中断委托给 S 态软件，请指出有哪些寄存器记录了委托信息，rustsbi 委托了哪些异常/中断？（RustSBI 在启动时输出了什么？）</p></li>
+<li><p>请通过 gdb 简单跟踪从机器加电到跳转到 0x80200000 的简单过程，描述重要的跳转即可。程序是如何进入 S 态的？</p>
+<ul class="simple">
+<li><p>事实上进入 rustsbi (0x80000000) 之后就不需要使用 gdb 调试了。可以直接阅读代码。<a class="reference external" href="https://github.com/rustsbi/rustsbi-qemu/blob/main/rustsbi-qemu/src/main.rs#L146">rustsbi起始代码</a> 。</p></li>
+<li><p>可以使用 Makefile 中的 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">debug</span></code> 指令。</p></li>
+<li><dl class="simple">
+<dt>一些可能用到的 gdb 指令：</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">x/10i</span> <span class="pre">0x80000000</span></code> : 显示 0x80000000 处的10条汇编指令。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x/10i</span> <span class="pre">$pc</span></code> : 显示即将执行的10条汇编指令。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x/10xw</span> <span class="pre">0x80000000</span></code> : 显示 0x80000000 处的10条数据，格式为16进制32bit。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">info</span> <span class="pre">register</span></code>: 显示当前所有寄存器信息。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">info</span> <span class="pre">r</span> <span class="pre">t0</span></code>: 显示 t0 寄存器的值。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">break</span> <span class="pre">funcname</span></code>: 在目标函数第一条指令处设置断点。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">break</span> <span class="pre">*0x80200000</span></code>: 在 0x80200000 出设置断点。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">continue</span></code>: 执行直到碰到断点。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">si</span></code>: 单步执行一条汇编指令。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li><p>深入理解 <a class="reference external" href="https://github.com/rcore-os/rCore-Tutorial-v3/blob/ch2/os/src/trap/trap.S">trap.S</a> 中两个函数 <code class="docutils literal notranslate"><span class="pre">__alltraps</span></code> 和 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的作用，并回答如下几个问题:</p>
+<ol class="arabic">
+<li><p>L40：刚进入 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 时，<code class="docutils literal notranslate"><span class="pre">a0</span></code> 代表了什么值。请指出 <code class="docutils literal notranslate"><span class="pre">__restore</span></code> 的两种使用情景。</p></li>
+<li><p>L46-L51：这几行汇编代码特殊处理了哪些寄存器？这些寄存器的的值对于进入用户态有何意义？请分别解释。</p>
+<div class="highlight-riscv notranslate"><div class="highlight"><pre><span></span><span class="nd">ld</span><span class="w"> </span><span class="na">t0</span>,<span class="w"> </span><span class="m">32</span>*<span class="m">8</span>(<span class="na">sp</span>)<span class="w"></span>
+<span class="nd">ld</span><span class="w"> </span><span class="na">t1</span>,<span class="w"> </span><span class="m">33</span>*<span class="m">8</span>(<span class="na">sp</span>)<span class="w"></span>
+<span class="nd">ld</span><span class="w"> </span><span class="na">t2</span>,<span class="w"> </span><span class="m">2</span>*<span class="m">8</span>(<span class="na">sp</span>)<span class="w"></span>
+<span class="nd">csrw</span><span class="w"> </span><span class="no">sstatus</span>,<span class="w"> </span><span class="na">t0</span><span class="w"></span>
+<span class="nd">csrw</span><span class="w"> </span><span class="no">sepc</span>,<span class="w"> </span><span class="na">t1</span><span class="w"></span>
+<span class="nd">csrw</span><span class="w"> </span><span class="no">sscratch</span>,<span class="w"> </span><span class="na">t2</span><span class="w"></span>
+</pre></div>
+</div>
+</li>
+<li><p>L53-L59：为何跳过了 <code class="docutils literal notranslate"><span class="pre">x2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">x4</span></code>？</p>
+<div class="highlight-riscv notranslate"><div class="highlight"><pre><span></span><span class="nd">ld</span><span class="w"> </span><span class="na">x1</span>,<span class="w"> </span><span class="m">1</span>*<span class="m">8</span>(<span class="na">sp</span>)<span class="w"></span>
+<span class="nd">ld</span><span class="w"> </span><span class="na">x3</span>,<span class="w"> </span><span class="m">3</span>*<span class="m">8</span>(<span class="na">sp</span>)<span class="w"></span>
+<span class="nf">.set</span><span class="w"> </span><span class="ni">n</span>,<span class="w"> </span><span class="m">5</span><span class="w"></span>
+<span class="nf">.rept</span><span class="w"> </span><span class="m">27</span><span class="w"></span>
+<span class="w">   </span><span class="nb">LOAD_GP</span><span class="w"> </span>%<span class="ni">n</span><span class="w"></span>
+<span class="w">   </span><span class="nf">.set</span><span class="w"> </span><span class="ni">n</span>,<span class="w"> </span><span class="ni">n</span>+<span class="m">1</span><span class="w"></span>
+<span class="nf">.endr</span><span class="w"></span>
+</pre></div>
+</div>
+</li>
+<li><p>L63：该指令之后，<code class="docutils literal notranslate"><span class="pre">sp</span></code> 和 <code class="docutils literal notranslate"><span class="pre">sscratch</span></code> 中的值分别有什么意义？</p>
+<div class="highlight-riscv notranslate"><div class="highlight"><pre><span></span><span class="nd">csrrw</span><span class="w"> </span><span class="na">sp</span>,<span class="w"> </span><span class="no">sscratch</span>,<span class="w"> </span><span class="na">sp</span><span class="w"></span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__restore</span></code>：中发生状态切换在哪一条指令？为何该指令执行之后会进入用户态？</p></li>
+<li><p>L13：该指令之后，<code class="docutils literal notranslate"><span class="pre">sp</span></code> 和 <code class="docutils literal notranslate"><span class="pre">sscratch</span></code> 中的值分别有什么意义？</p>
+<div class="highlight-riscv notranslate"><div class="highlight"><pre><span></span><span class="nd">csrrw</span><span class="w"> </span><span class="na">sp</span>,<span class="w"> </span><span class="no">sscratch</span>,<span class="w"> </span><span class="na">sp</span><span class="w"></span>
+</pre></div>
+</div>
+</li>
+<li><p>从 U 态进入 S 态是哪一条指令发生的？</p></li>
+</ol>
+</li>
+<li><p>stride 算法深入</p>
+<p>stride 算法原理非常简单，但是有一个比较大的问题。例如两个 pass = 10 的进程，使用 8bit 无符号整形储存 stride， p1.stride = 255, p2.stride = 250，在 p2 执行一个时间片后，理论上下一次应该 p1 执行。</p>
+<ul class="simple">
+<li><p>实际情况是轮到 p1 执行吗？为什么？</p></li>
+</ul>
+<p>我们之前要求进程优先级 &gt;= 2 其实就是为了解决这个问题。可以证明，<strong>在不考虑溢出的情况下</strong>, 在进程优先级全部 &gt;= 2 的情况下，如果严格按照算法执行，那么 STRIDE_MAX – STRIDE_MIN &lt;= BigStride / 2。</p>
+<ul class="simple">
+<li><p>为什么？尝试简单说明（传达思想即可，不要求严格证明）。</p></li>
+</ul>
+</li>
+</ol>
 </div>
 <div class="section" id="id6">
 <h2>报告要求<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
