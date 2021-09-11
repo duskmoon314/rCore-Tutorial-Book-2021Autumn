@@ -295,19 +295,18 @@
 <h2>OS 环境配置<a class="headerlink" href="#os" title="永久链接至标题">¶</a></h2>
 <p>目前，实验主要支持 Ubuntu18.04/20.04 操作系统。使用 Windows10 和 macOS 的读者，可以安装一台 Ubuntu18.04 虚拟机或 Docker
 进行实验。</p>
-<p>Windows10 用户可以通过系统内置的 <strong>WSL2</strong> 虚拟机（请不要使用 WSL1）来安装 Ubuntu 18.04 / 20.04 。读者请自行在互联网上搜索相关安装教程。
-.. note:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>**Docker 开发环境**
-
-感谢 dinghao188 和张汉东老师帮忙配置好的 Docker 开发环境，进入 Docker 开发环境之后不需要任何软件工具链的安装和配置，可以直接将 tutorial 运行起来，目前应该仅支持将 tutorial 运行在 Qemu 模拟器上。
-
-使用方法如下（以 Ubuntu18.04 为例）：
-
-1. 通过 ``su`` 切换到管理员账户 ``root`` ；
-2. 在 ``rCore-Tutorial`` 根目录下 ``make docker`` 进入到 Docker 环境；
-3. 进入 Docker 之后，会发现当前处于根目录 ``/`` ，我们通过 ``cd mnt`` 将当前工作路径切换到 ``/mnt`` 目录；
-4. 通过 ``ls`` 可以发现 ``/mnt`` 目录下的内容和 ``rCore-Tutorial-v3`` 目录下的内容完全相同，接下来就可以在这个环境下运行 tutorial 了。例如 ``cd os &amp;&amp; make run`` 。
-</pre></div>
+<p>Windows10 用户可以通过系统内置的 <strong>WSL2</strong> 虚拟机（请不要使用 WSL1）来安装 Ubuntu 18.04 / 20.04 。读者请自行在互联网上搜索相关安装教程，或 <a class="reference external" href="https://docs.microsoft.com/zh-cn/windows/wsl/install-win10#step-4---download-the-linux-kernel-update-package">适用于 Linux 的 Windows 子系统安装指南 (Windows 10)</a> 。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><strong>Docker 开发环境</strong></p>
+<p>感谢 dinghao188 和张汉东老师帮忙配置好的 Docker 开发环境，进入 Docker 开发环境之后不需要任何软件工具链的安装和配置，可以直接将 tutorial 运行起来，目前应该仅支持将 tutorial 运行在 Qemu 模拟器上。</p>
+<p>使用方法如下（以 Ubuntu18.04 为例）：</p>
+<ol class="arabic simple">
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">su</span></code> 切换到管理员账户 <code class="docutils literal notranslate"><span class="pre">root</span></code> ；</p></li>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">rCore-Tutorial</span></code> 根目录下 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">docker</span></code> 进入到 Docker 环境；</p></li>
+<li><p>进入 Docker 之后，会发现当前处于根目录 <code class="docutils literal notranslate"><span class="pre">/</span></code> ，我们通过 <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">mnt</span></code> 将当前工作路径切换到 <code class="docutils literal notranslate"><span class="pre">/mnt</span></code> 目录；</p></li>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">ls</span></code> 可以发现 <code class="docutils literal notranslate"><span class="pre">/mnt</span></code> 目录下的内容和 <code class="docutils literal notranslate"><span class="pre">rCore-Tutorial-v3</span></code> 目录下的内容完全相同，接下来就可以在这个环境下运行 tutorial 了。例如 <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">os</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">run</span></code> 。</p></li>
+</ol>
 </div>
 <p>使用 macOS 进行实验理论上也是可行的，但本章节仅介绍 Ubuntu 下的环境配置方案。</p>
 <div class="admonition note">
