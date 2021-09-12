@@ -439,6 +439,15 @@ qemu-riscv64 --version
 <div class="admonition attention">
 <p class="admonition-title">注意</p>
 <p>请务必执行 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code>，这将为你安装一些上文没有提及的 Rust 包依赖。</p>
+<p>如果卡在了</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Updating git repository `https://github.com/rcore-os/riscv`
+</pre></div>
+</div>
+<p>请通过更换 hosts 等方式解决科学上网问题，或者将 riscv 项目下载到本地，并修改 os/Cargo.toml 中的 riscv 包依赖路径</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">dependencies</span><span class="p">]</span>
+<span class="n">riscv</span> <span class="o">=</span> <span class="p">{</span> <span class="n">path</span> <span class="o">=</span> <span class="s2">"YOUR riscv PATH"</span><span class="p">,</span> <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"inline-asm"</span><span class="p">]</span> <span class="p">}</span>
+</pre></div>
+</div>
 </div>
 <p>恭喜你完成了实验环境的配置，可以开始阅读教程的正文部分了！</p>
 </div>
